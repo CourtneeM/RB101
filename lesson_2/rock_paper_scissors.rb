@@ -1,20 +1,18 @@
 VALID_CHOICES = %w[rock paper scissors lizard spock]
+MOVE_CONDITIONS = {
+  'rock' => ['scissors', 'lizard'],
+  'paper' => ['rock', 'spock'],
+  'scissors' => ['paper', 'lizard'],
+  'lizard' => ['paper', 'spock'],
+  'spock' => ['rock', 'scissors']
+}
 
 def prompt(message)
   puts "=> #{message}"
 end
 
 def win?(first, second)
-  (first == 'rock' && second == 'scissors') ||
-    (first == 'rock' && second == 'lizard') ||
-    (first == 'paper' && second == 'rock') ||
-    (first == 'paper' && second == 'spock') ||
-    (first == 'scissors' && second == 'paper') ||
-    (first == 'scissors' && second == 'lizard') ||
-    (first == 'lizard' && second == 'paper') ||
-    (first == 'lizard' && second == 'spock') ||
-    (first == 'spock' && second == 'rock') ||
-    (first == 'spock' && second == 'scissors')
+  MOVE_CONDITIONS[first].include?(second)
 end
 
 def abbr_choice_to_choice(choice)
