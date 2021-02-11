@@ -27,14 +27,30 @@ def display_results(player, computer)
   end
 end
 
+def abbr_choice_to_choice(choice)
+  VALID_CHOICES.select do |valid_choice|
+    if valid_choice.start_with?('s')
+      valid_choice.start_with?(choice[0..1].downcase)
+    else
+      valid_choice.start_with?(choice.downcase)
+    end
+  end.join
+end
+
 loop do
   choice = ''
   loop do
     prompt("Choose one: #{VALID_CHOICES.join(', ')}")
     choice = gets.chomp
+    choice = abbr_choice_to_choice(choice) if !VALID_CHOICES.include?(choice)
 
-    VALID_CHOICES.include?(choice.downcase) ? break : prompt("That's not a valid choice.")
+    if VALID_CHOICES.include?(choice.downcase)
+      break
+    else
+      prompt("That's not a valid choice.")
+    end
   end
+
   computer_choice = VALID_CHOICES.sample
 
   prompt("You chose: #{choice}. Computer chose: #{computer_choice}")
