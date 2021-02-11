@@ -1,0 +1,57 @@
+START
+
+# Given a collection of integers called "numbers"
+
+SET iterator = 1
+SET saved_number = value within numbers collection at space 1
+
+WHILE interator <= length of numbers
+  SET current_number = value within numbers collection at space "iterator"
+  IF saved_number >= current_number
+    go to the next iteration
+  ELSE
+    saved_number = current_number
+
+  iterator = iterator + 1
+
+PRINT saved_number
+
+END
+
+START
+
+# Given two integers called a and b
+
+PRINT a + b
+
+END
+
+START
+
+# Given a collection of strings called "strings"
+
+SET joined_strings = empty
+
+WHILE string <= length of strings
+  joined_strings = joined_string + string
+
+PRINT joined_strings
+
+END
+
+START
+
+# Given a collection of integers called "numbers"
+
+SET count = 1
+SET alternating_numbers = []
+
+WHILE iterator <= length of numbers
+  IF count is odd
+    add count to alternating_numbers
+  
+  count = count + 1
+
+PRINT alternating_numbers
+
+END
