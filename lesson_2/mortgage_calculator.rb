@@ -53,9 +53,43 @@ def valid_number?(num)
   if num.to_i <= 0 || num.to_f <= 0
     false
   elsif num.to_i.to_s == num || num.to_f.to_s == num
-    'valid'
+    true
   else
     false
+  end
+end
+
+def get_loan_amount
+  loop do
+    prompt("What is the loan amount?")
+    loan_amount = gets.chomp
+
+    return loan_amount if valid_number?(loan_amount)
+
+    prompt("You entered: #{loan_amount}. That is not a valid input.")
+  end
+end
+
+def get_apr
+  loop do
+    prompt("What is the APR?")
+    prompt("(Example: 5% would be 5)")
+    apr = gets.chomp
+
+    return apr if valid_number?(apr)
+
+    prompt("You entered: #{apr}. That is not a valid input.")
+  end
+end
+
+def get_loan_duration_years
+  loop do
+    prompt("What is the duration of the loan in years?")
+    loan_duration_years = gets.chomp
+
+    return loan_duration_years if valid_number?(loan_duration_years)
+
+    prompt("You entered: #{loan_duration_years}. That is not a valid input.")
   end
 end
 
@@ -74,6 +108,26 @@ def calculate_monthly_payment(loan_amount,
   (1 + monthly_interest_rate)**(-loan_duration_months)))
 end
 
+def display_results(monthly_payment)
+  prompt("Your monthly payment will be $#{format('%.2f', monthly_payment)}.")
+end
+
+def calculate_again?
+  prompt("Would you like to calculate another monthly payment?")
+  prompt("Y to calculate again, otherwise type anything to exit.")
+  answer = gets.chomp.downcase
+  answer
+end
+
+def clear_screen
+  system("cls") || system("clear")
+end
+
+def display_goodbye_message
+  prompt("Thank you for using Mortgage Calculator!")
+  prompt("Goodbye.")
+end
+
 def prompt(message)
   puts "=> #{message}"
 end
@@ -81,36 +135,9 @@ end
 prompt("Welcome to Mortgage Calculator!")
 
 loop do
-  loan_amount = 0
-  loop do
-    prompt("What is the loan amount?")
-    loan_amount = gets.chomp
-
-    break if valid_number?(loan_amount)
-
-    prompt("You entered: #{loan_amount}. That is not a valid input.")
-  end
-
-  apr = 0
-  loop do
-    prompt("What is the APR?")
-    prompt("(Example: 5% would be 5)")
-    apr = gets.chomp
-
-    break if valid_number?(apr)
-
-    prompt("You entered: #{apr}. That is not a valid input.")
-  end
-
-  loan_duration_years = 0
-  loop do
-    prompt("What is the duration of the loan in years?")
-    loan_duration_years = gets.chomp
-
-    break if valid_number?(loan_duration_years)
-
-    prompt("You entered: #{loan_duration_years}. That is not a valid input.")
-  end
+  loan_amount = get_loan_amount
+  apr = get_apr
+  loan_duration_years = get_loan_duration_years
 
   monthly_interest_rate = apr_to_monthly_interest(apr)
   loan_duration_months = year_to_month_loan_duration(loan_duration_years)
@@ -118,17 +145,11 @@ loop do
                                               monthly_interest_rate,
                                               loan_duration_months)
 
-  prompt("Your monthly payment will be $#{monthly_payment.round(2)} "\
-         "with an APR of #{apr.to_f.round(2)}% and "\
-         "loan duration of #{loan_duration_years.to_i.round(2)} years.")
+  display_results(monthly_payment)
 
-  prompt("Would you like to calculate another monthly payment? (Yes/No)")
-  answer = gets.chomp.downcase
+  break unless calculate_again?.start_with?('y')
 
-  break if !answer.start_with?('y')
-
-  system("cls") || system("clear")
+  clear_screen
 end
 
-prompt("Thank you for using Mortgage Calculator!")
-prompt("Goodbye.")
+display_goodbye_message
