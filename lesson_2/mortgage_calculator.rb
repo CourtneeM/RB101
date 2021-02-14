@@ -125,6 +125,8 @@ loop do
   answer = gets.chomp.downcase
 
   break if !answer.start_with?('y')
+
+  system("cls") || system("clear")
 end
 
 prompt("Thank you for using Mortgage Calculator!")
