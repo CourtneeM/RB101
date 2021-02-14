@@ -50,7 +50,7 @@
 # ---------------------------------------------------------------------------
 
 def valid_number?(num)
-  if num.to_i.zero? || num.to_f.zero?
+  if num.to_i <= 0 || num.to_f <= 0
     false
   elsif num.to_i.to_s == num || num.to_f.to_s == num
     'valid'
@@ -70,7 +70,7 @@ end
 def calculate_monthly_payment(loan_amount,
                               monthly_interest_rate,
                               loan_duration_months)
-  loan_amount.to_i * (monthly_interest_rate / (1 -
+  loan_amount.to_f * (monthly_interest_rate / (1 -
   (1 + monthly_interest_rate)**(-loan_duration_months)))
 end
 
@@ -93,7 +93,8 @@ loop do
 
   apr = 0
   loop do
-    prompt("What is the APR? Type the percentage without %. (Ex. 5% would be 5)")
+    prompt("What is the APR?")
+    prompt("(Example: 5% would be 5)")
     apr = gets.chomp
 
     break if valid_number?(apr)
@@ -119,7 +120,7 @@ loop do
 
   prompt("Your monthly payment will be $#{monthly_payment.round(2)} "\
          "with an APR of #{apr.to_f.round(2)}% and "\
-         "loan duration of #{loan_duration_years.to_f.round(2)} years.")
+         "loan duration of #{loan_duration_years.to_i.round(2)} years.")
 
   prompt("Would you like to calculate another monthly payment? (Yes/No)")
   answer = gets.chomp.downcase
