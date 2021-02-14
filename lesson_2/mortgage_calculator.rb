@@ -1,54 +1,3 @@
-# Build a mortgage calculator
-
-# input: 3 integers - loan amount, yearly interest rate, loan duration in years
-# output: a string containing the monthly interest rate, loan duration in months, monthly payment
-
-# Test Cases:
-# input: 10000, 10%, 10
-# output: $132.15
-# input: 20000, 5%, 8
-# output: $253.20
-# input: 100000, 8%, 15
-# output: $955.65
-
-# Algorithm:
-# Ask the user for the loan amount and save to a variable called loan_amount
-# Ask the user for the APR and save to a variable called apr (ask for it in percentage)
-# Ask the user for the loan duration in years and save to a variable called loan_duration_years
-# Validate each of the user inputs
-#   Create a loop that checks if the user input is a number
-#   If false, print a message asking for correct input and save input to original variable
-#   Break loop if true
-# Calculate the monthly interest rate and save to a variable called monthly_interest_rate
-#   monthly_interest_rate = apr / 12
-# Calculate the loan duration in months and save to a variable called loan_duration_months
-#   loan_duration_months = loan_duration_years * 12
-# Calculate the monthly payment by using the formula:
-# monthly_payment = loan_amount * (monthly_interest_rate / (1 - (1 + monthly_interest_rate)**(-loan_duration_months)))
-# Print a string containing monthly_interest_rate, loan_duration_months, monthly_payment
-
-# Pseudo-Code
-
-# START
-
-# # Given 3 integers, calculate the monthly payment amount for the given APR and loan duration.
-
-# GET loan_amount, apr, loan_duration_years
-# LOOP
-#   BREAK if valid_number?(check variable for validity)
-#   PRINT message asking for correct input
-#   GET input to replace incorrect variable
-
-# SET monthly_interest_rate = apr / 12
-# SET loan_duration_months = loan_duration_years * 12
-# SET monthly_payment = loan_amount * (monthly_interest_rate / (1 - (1 + monthly_interest_rate)**(-loan_duration_months)))
-
-# PRINT string with monthly_interest_rate, loan_duration_months, monthly_payment
-
-# END
-
-# ---------------------------------------------------------------------------
-
 def valid_number?(num)
   if num.to_i <= 0 || num.to_f <= 0
     false
@@ -115,12 +64,12 @@ end
 def calculate_again?
   prompt("Would you like to calculate another monthly payment?")
   prompt("Y to calculate again, otherwise type anything to exit.")
-  answer = gets.chomp.downcase
+  answer = gets.chomp
   answer
 end
 
-def clear_screen
-  system("cls") || system("clear")
+def display_welcome_message
+  prompt("Welcome to Mortgage Calculator!")
 end
 
 def display_goodbye_message
@@ -128,11 +77,15 @@ def display_goodbye_message
   prompt("Goodbye.")
 end
 
+def clear_screen
+  system("cls") || system("clear")
+end
+
 def prompt(message)
   puts "=> #{message}"
 end
 
-prompt("Welcome to Mortgage Calculator!")
+display_welcome_message
 
 loop do
   loan_amount = get_loan_amount
@@ -147,7 +100,7 @@ loop do
 
   display_results(monthly_payment)
 
-  break unless calculate_again?.start_with?('y')
+  break unless calculate_again?.downcase.start_with?('y')
 
   clear_screen
 end
