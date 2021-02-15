@@ -76,9 +76,17 @@ end
 
 def calculate_again?
   prompt("Would you like to calculate another monthly payment?")
-  prompt("Y to calculate again, otherwise type anything to exit.")
-  answer = gets.chomp
-  answer
+
+  loop do
+    prompt("Y to calculate again, N to exit.")
+    answer = gets.chomp
+
+    case answer.downcase
+    when 'y', 'yes' then return true
+    when 'n', 'no' then return false
+    else prompt("That's not a valid choice.")
+    end
+  end
 end
 
 def display_welcome_message
@@ -101,9 +109,9 @@ end
 display_welcome_message
 
 loop do
-  p loan_amount = get_loan_amount
-  p apr = get_apr
-  p loan_duration_years = get_loan_duration_years
+  loan_amount = get_loan_amount
+  apr = get_apr
+  loan_duration_years = get_loan_duration_years
 
   monthly_interest_rate = apr_to_monthly_interest(apr)
   loan_duration_months = year_to_month_loan_duration(loan_duration_years)
@@ -113,7 +121,7 @@ loop do
 
   display_results(monthly_payment)
 
-  break unless calculate_again?.downcase.start_with?('y')
+  break unless calculate_again?
 
   clear_screen
 end
