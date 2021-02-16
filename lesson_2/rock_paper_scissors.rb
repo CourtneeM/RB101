@@ -1,5 +1,4 @@
-VALID_CHOICES = %w(rock paper scissors spock lizard)
-WINNING_MOVES = {
+MOVES = {
   'rock' => ['scissors', 'lizard'],
   'paper' => ['rock', 'spock'],
   'scissors' => ['paper', 'lizard'],
@@ -7,16 +6,19 @@ WINNING_MOVES = {
   'lizard' => ['paper', 'spock']
 }
 
+ABBR = ['r', 'p', 'sc', 'sp', 'l']
+
 def prompt(message)
   puts "=> #{message}"
 end
 
 def player_choice
   loop do
-    prompt("Choose one: #{VALID_CHOICES.join(', ')}.")
+    prompt("Choose one: #{MOVES.keys.join(', ')}.")
     choice = gets.chomp
 
-    if VALID_CHOICES.include?(choice)
+    if valid_player_choice?(choice)
+      choice = MOVES.keys.select { |key| key.start_with?(choice) }.join
       return choice
     else
       prompt("That's not a valid choice.")
@@ -24,8 +26,13 @@ def player_choice
   end
 end
 
+def valid_player_choice?(choice)
+  MOVES.keys.include?(choice) ||
+    ABBR.include?(choice)
+end
+
 def win?(first, second)
-  WINNING_MOVES[first].include?(second)
+  MOVES[first].include?(second)
 end
 
 def play_again?
@@ -71,7 +78,7 @@ display_welcome_message
 
 loop do
   choice = player_choice
-  computer_choice = VALID_CHOICES.sample
+  computer_choice = MOVES.keys.sample
 
   display_round_choices(choice, computer_choice)
   display_results(choice, computer_choice)
