@@ -1,18 +1,19 @@
-VALID_CHOICES = %w(rock paper scissors)
+VALID_CHOICES = %w(rock paper scissors spock lizard)
+WINNING_MOVES = {
+  'rock' => ['scissors', 'lizard'],
+  'paper' => ['rock', 'spock'],
+  'scissors' => ['paper', 'lizard'],
+  'spock' => ['rock', 'scissors'],
+  'lizard' => ['paper', 'spock']
+}
 
 def prompt(message)
   puts "=> #{message}"
 end
 
-def win?(first, second)
-  (first == 'rock' && second == 'scissors') ||
-    (first == 'paper' && second == 'rock') ||
-    (first == 'scissors' && second == 'paper')
-end
-
 def player_choice
   loop do
-    prompt("Choose one: #{VALID_CHOICES.join(', ')}")
+    prompt("Choose one: #{VALID_CHOICES.join(', ')}.")
     choice = gets.chomp
 
     if VALID_CHOICES.include?(choice)
@@ -21,6 +22,10 @@ def player_choice
       prompt("That's not a valid choice.")
     end
   end
+end
+
+def win?(first, second)
+  WINNING_MOVES[first].include?(second)
 end
 
 def play_again?
@@ -53,7 +58,7 @@ def display_results(player, computer)
 end
 
 def display_welcome_message
-  prompt("Welcome to Rock, Paper, Scissors, Lizard, Spock!")
+  prompt("Welcome to Rock, Paper, Scissors, Spock, Lizard!")
   prompt("Whoever wins 5 rounds will be the grand winner. Good luck!")
   prompt("----------------------------------------------------------")
 end
