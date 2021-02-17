@@ -1,12 +1,10 @@
 MOVES = {
-  'rock' => ['scissors', 'lizard'],
-  'paper' => ['rock', 'spock'],
-  'scissors' => ['paper', 'lizard'],
-  'spock' => ['rock', 'scissors'],
-  'lizard' => ['paper', 'spock']
+  'rock' => { 'abbr' => 'r', 'beats' => ['scissors', 'lizard'] },
+  'paper' => { 'abbr' => 'p', 'beats' => ['rock', 'spock'] },
+  'scissors' => { 'abbr' => 'sc', 'beats' => ['paper', 'lizard'] },
+  'spock' => { 'abbr' => 'sp', 'beats' => ['rock', 'scissors'] },
+  'lizard' => { 'abbr' => 'l', 'beats' => ['paper', 'spock'] }
 }
-
-ABBR = ['r', 'p', 'sc', 'sp', 'l']
 
 def prompt(message)
   puts "=> #{message}"
@@ -25,7 +23,7 @@ end
 def player_choice
   loop do
     prompt("Choose one: #{MOVES.keys.join(', ')}.")
-    choice = gets.chomp
+    choice = gets.chomp.downcase
 
     if valid_player_choice?(choice)
       choice = MOVES.keys.select { |key| key.start_with?(choice) }.join
@@ -37,12 +35,14 @@ def player_choice
 end
 
 def valid_player_choice?(choice)
+  abbr = MOVES.keys.map { |key| MOVES[key]['abbr'] }
+
   MOVES.keys.include?(choice) ||
-    ABBR.include?(choice)
+    abbr.include?(choice)
 end
 
 def win?(first, second)
-  MOVES[first].include?(second)
+  MOVES[first]['beats'].include?(second)
 end
 
 def update_score(choice, computer_choice, score)
