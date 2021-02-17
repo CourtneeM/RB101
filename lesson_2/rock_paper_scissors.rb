@@ -6,6 +6,8 @@ MOVES = {
   'lizard' => { 'abbr' => 'l', 'beats' => ['paper', 'spock'] }
 }
 
+GOAL_WINS = 5
+
 def prompt(message)
   puts "=> #{message}"
 end
@@ -14,6 +16,7 @@ def play_round(score)
   choice = player_choice
   computer_choice = MOVES.keys.sample
 
+  clear_screen
   display_round_choices(choice, computer_choice)
   update_score(choice, computer_choice, score)
   display_results(choice, computer_choice)
@@ -54,7 +57,7 @@ def update_score(choice, computer_choice, score)
 end
 
 def grand_winner?(score)
-  score[:player] == 5 || score[:computer] == 5
+  score[:player] == GOAL_WINS || score[:computer] == GOAL_WINS
 end
 
 def play_again?
@@ -92,7 +95,7 @@ def display_current_score(score)
 end
 
 def display_grand_winner(score)
-  if score[:player] == 5
+  if score[:player] == GOAL_WINS
     prompt("Congrats, you are the grand winner!")
   else
     prompt("The computer is the grand winner!")
@@ -113,6 +116,7 @@ def clear_screen
   system("cls") || system("clear")
 end
 
+clear_screen
 display_welcome_message
 
 loop do
