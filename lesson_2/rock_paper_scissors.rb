@@ -53,6 +53,10 @@ def update_score(choice, computer_choice, score)
   end
 end
 
+def grand_winner?(score)
+  score[:player] == 5 || score[:computer] == 5
+end
+
 def play_again?
   prompt("---------------------------------")
   prompt("Do you want to play again?")
@@ -114,7 +118,7 @@ display_welcome_message
 loop do
   score = { player: 0, computer: 0 }
 
-  until score[:player] == 5 || score[:computer] == 5
+  until grand_winner?(score)
     play_round(score)
   end
 
