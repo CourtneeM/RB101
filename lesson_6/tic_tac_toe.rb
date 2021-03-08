@@ -15,6 +15,17 @@ def clear_screen
   system 'cls' || 'clear'
 end
 
+def joinor(arr, separator = ', ', joining = 'or')
+  if arr.size < 2
+    arr.join
+  elsif arr.size == 2
+    arr.join(' or ')
+  else
+    arr = arr.join(separator)
+    arr.split.insert(-2, joining).join(' ')
+  end
+end
+
 def display_board(brd)
   clear_screen
   puts "You're a #{PLAYER_MARKER}. Computer is #{COMPUTER_MARKER}."
@@ -46,7 +57,7 @@ end
 def player_places_piece!(brd)
   square = ''
   loop do
-    prompt "Choose a square (#{empty_squares(brd).join(', ')}):"
+    prompt "Choose a square (#{joinor(empty_squares(brd))}):"
     square = gets.chomp.to_i
     break if empty_squares(brd).include?(square)
     prompt("Sorry, that's not a valid choice.")
