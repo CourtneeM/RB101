@@ -6,13 +6,14 @@ COMPUTER_MARKER = 'O'
 WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9],
                  [1, 4, 7], [2, 5, 8], [3, 6, 9],
                  [1, 5, 9], [3, 5, 7]]
+ROUNDS_TO_WIN = 5
 
 def prompt(message)
   puts ">> #{message}"
 end
 
 def clear_screen
-  system 'cls' || 'clear'
+  system('cls') || system('clear')
 end
 
 def joinor(arr, separator = ', ', joining = 'or')
@@ -26,8 +27,12 @@ def joinor(arr, separator = ', ', joining = 'or')
   end
 end
 
-def display_board(brd)
+def display_rules
   clear_screen
+  prompt("First to 5 wins is the winner!")
+end
+
+def display_board(brd)
   puts "You're a #{PLAYER_MARKER}. Computer is #{COMPUTER_MARKER}."
   puts ""
   puts "     |     |"
@@ -89,26 +94,57 @@ def detect_winner(brd)
   nil
 end
 
+def detect_grand_winner(score)
+  score.values.any?(ROUNDS_TO_WIN)
+end
+
+def display_grand_winner(score)
+  winner = score.select { |_, v| v == ROUNDS_TO_WIN }
+  prompt("#{winner.keys.join.capitalize} is the grand winner!")
+  puts "------------------------------"
+end
+
+def increment_score(score, winner)
+  score[winner.downcase] += 1
+end
+
+def display_score(score)
+  puts "Player: #{score['player']} | Computer: #{score['computer']}"
+end
+
 loop do
-  board = initialize_board
+  score = { 'player' => 0, 'computer' => 0 }
 
   loop do
+    board = initialize_board
+
+    loop do
+      display_rules
+      display_board(board)
+      display_score(score)
+
+      player_places_piece!(board)
+      break if someone_won?(board) || board_full?(board)
+
+      computer_places_piece!(board)
+      break if someone_won?(board) || board_full?(board)
+    end
+
+    clear_screen
+    if someone_won?(board)
+      prompt("#{detect_winner(board)} won!")
+      increment_score(score, detect_winner(board))
+    else
+      prompt("It's a tie!")
+    end
+
+    display_score(score)
     display_board(board)
 
-    player_places_piece!(board)
-    break if someone_won?(board) || board_full?(board)
-
-    computer_places_piece!(board)
-    break if someone_won?(board) || board_full?(board)
+    break if detect_grand_winner(score)
   end
 
-  display_board(board)
-
-  if someone_won?(board)
-    prompt("#{detect_winner(board)} won!")
-  else
-    prompt("It's a tie!")
-  end
+  display_grand_winner(score)
 
   prompt("Play again? (y or n)")
   answer = gets.chomp
