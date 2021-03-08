@@ -1,3 +1,5 @@
+require 'pry'
+
 INITIAL_MARKER = ' '
 PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
@@ -6,7 +8,12 @@ def prompt(message)
   puts ">> #{message}"
 end
 
+def clear_screen
+  system 'cls' || 'clear'
+end
+
 def display_board(brd)
+  clear_screen
   puts ""
   puts "     |     |"
   puts "  #{brd[1]}  |  #{brd[2]}  |  #{brd[3]}"
@@ -43,9 +50,28 @@ def player_places_piece!(brd)
   brd[square] = PLAYER_MARKER
 end
 
+def computer_places_piece!(brd)
+  square = empty_squares(brd).sample
+  brd[square] = COMPUTER_MARKER
+end
+
+def board_full?(brd)
+  empty_squares(brd).empty?
+end
+
+def someone_won?(brd)
+  false
+end
+
 board = initialize_board
 display_board(board)
 
-player_places_piece!(board)
-puts board.inspect
+loop do
+  player_places_piece!(board)
+  computer_places_piece!(board)
+  puts board.inspect
+  display_board(board)
+  break if someone_won?(board) || board_full?(board)
+end
+
 display_board(board)
