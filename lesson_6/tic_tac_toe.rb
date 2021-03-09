@@ -71,7 +71,28 @@ def player_places_piece!(brd)
 end
 
 def computer_places_piece!(brd)
-  square = empty_squares(brd).sample
+  filled_squares = WINNING_LINES.map do |sub_arr|
+    sub_arr.reject { |num| empty_squares(brd).include?(num) }
+  end
+
+  danger = filled_squares.select do |sub_arr|
+    next false if sub_arr.size == 3
+    brd[sub_arr[0]] == PLAYER_MARKER && brd[sub_arr[1]] == PLAYER_MARKER
+  end
+
+  if !danger.empty?
+    square = 0
+    selected_danger_line = danger.sample
+    WINNING_LINES.map do |line|
+      if line.include?(selected_danger_line[0]) &&
+         line.include?(selected_danger_line[1])
+        square = (line + selected_danger_line).tally.select { |_, v| v == 1 }.keys[0]
+      end
+    end
+  else
+    square = empty_squares(brd).sample
+  end
+
   brd[square] = COMPUTER_MARKER
 end
 
@@ -114,15 +135,14 @@ end
 
 loop do
   score = { 'player' => 0, 'computer' => 0 }
+  display_rules
 
   loop do
     board = initialize_board
 
     loop do
-      display_rules
       display_board(board)
       display_score(score)
-
       player_places_piece!(board)
       break if someone_won?(board) || board_full?(board)
 
@@ -150,3 +170,5 @@ loop do
   answer = gets.chomp
   break unless answer.downcase.start_with?('y')
 end
+
+# fix display of score / clearing screen
