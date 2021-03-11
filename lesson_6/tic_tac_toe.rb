@@ -1,6 +1,6 @@
 require 'pry'
 
-WHO_FIRST = 'player'
+WHO_FIRST = 'choose'
 INITIAL_MARKER = ' '
 PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
@@ -60,6 +60,19 @@ def empty_squares(brd)
   brd.keys.select { |num| brd[num] == INITIAL_MARKER }
 end
 
+def who_moves_first?
+  if WHO_FIRST == 'player'
+    'X'
+  elsif WHO_FIRST == 'computer'
+    'O'
+  elsif WHO_FIRST == 'choose'
+    prompt("Should the player or computer go first?")
+    prompt("(Type 'player' or 'computer')")
+    answer = gets.chomp.downcase
+    answer == 'computer' ? 'O' : 'X'
+  end
+end
+
 def player_places_piece!(brd)
   square = ''
   loop do
@@ -76,55 +89,33 @@ def computer_places_piece!(brd)
   WINNING_LINES.each do |line|
     square = find_danger_square(line, brd, COMPUTER_MARKER)
     break if square
-  end
-
-  if !square
-    WINNING_LINES.each do |line|
-      square = find_danger_square(line, brd, PLAYER_MARKER)
-      break if square
-    end
+    square = find_danger_square(line, brd, PLAYER_MARKER)
+    break if square
   end
 
   if !square
     square = 5 if brd[5] == INITIAL_MARKER
   end
 
-  if !square
-    square = empty_squares(brd).sample
-  end
-
+  square = empty_squares(brd).sample if !square
   brd[square] = COMPUTER_MARKER
+end
+
+def place_piece!(board, current_player)
+  if current_player == 'X'
+    player_places_piece!(board)
+  else
+    computer_places_piece!(board)
+  end
+end
+
+def alternate_player(current_player)
+  current_player == 'X' ? 'O' : 'X'
 end
 
 def find_danger_square(line, brd, marker)
   if brd.values_at(*line).count(marker) == 2
     brd.select { |k, v| line.include?(k) && v == INITIAL_MARKER }.keys.first
-  end
-end
-
-def player_first(board, score)
-  loop do
-    display_board(board)
-    display_score(score)
-
-    player_places_piece!(board)
-    break if someone_won?(board) || board_full?(board)
-
-    computer_places_piece!(board)
-    break if someone_won?(board) || board_full?(board)
-  end
-end
-
-def computer_first(board, score)
-  loop do
-    display_board(board)
-    display_score(score)
-
-    computer_places_piece!(board)
-    break if someone_won?(board) || board_full?(board)
-
-    player_places_piece!(board)
-    break if someone_won?(board) || board_full?(board)
   end
 end
 
@@ -168,25 +159,19 @@ end
 loop do
   score = { 'player' => 0, 'computer' => 0 }
   display_rules
-
+  first_move = who_moves_first?
+  
   loop do
     board = initialize_board
+    current_player = first_move
 
-    if WHO_FIRST == 'player'
-      player_first(board, score)
-    elsif WHO_FIRST == 'computer'
-      computer_first(board, score)
-    elsif WHO_FIRST == 'choose'
-      prompt("Should the player or computer go first?")
-      prompt("(Type 'player' or 'computer')")
-      answer = gets.chomp.downcase
+    loop do
+      display_board(board)
+      display_score(score)
 
-      case answer
-      when 'player' then player_first(board, score)
-      when 'computer' then computer_first(board, score)
-      end
-    else
-      player_first(board, score)
+      place_piece!(board, current_player)
+      current_player = alternate_player(current_player)
+      break if someone_won?(board) || board_full?(board)
     end
 
     clear_screen
