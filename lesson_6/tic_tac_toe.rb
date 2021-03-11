@@ -1,6 +1,6 @@
 require 'pry'
 
-WHO_FIRST = 'choose'
+WHO_FIRST = 'player'
 INITIAL_MARKER = ' '
 PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
@@ -30,7 +30,7 @@ end
 
 def display_rules
   clear_screen
-  prompt("First to 5 wins is the winner!")
+  prompt("First to #{ROUNDS_TO_WIN} wins is the winner!")
 end
 
 def display_board(brd)
@@ -160,34 +160,35 @@ loop do
   score = { 'player' => 0, 'computer' => 0 }
   display_rules
   first_move = who_moves_first?
-  
+  board = nil
+
   loop do
     board = initialize_board
     current_player = first_move
 
     loop do
-      display_board(board)
       display_score(score)
+      display_board(board)
 
       place_piece!(board, current_player)
       current_player = alternate_player(current_player)
       break if someone_won?(board) || board_full?(board)
+      clear_screen
     end
 
     clear_screen
     if someone_won?(board)
-      prompt("#{detect_winner(board)} won!")
+      prompt("#{detect_winner(board)} won the round!")
       increment_score(score, detect_winner(board))
     else
       prompt("It's a tie!")
     end
 
-    display_score(score)
-    display_board(board)
-
     break if detect_grand_winner(score)
   end
 
+  display_score(score)
+  display_board(board)
   display_grand_winner(score)
 
   prompt("Play again? (y or n)")
