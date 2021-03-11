@@ -71,32 +71,22 @@ def player_places_piece!(brd)
 end
 
 def computer_places_piece!(brd)
-  danger = find_danger_line(brd)
-  if !danger.empty?
-    square = 0
-    selected_danger_line = danger.sample
-    WINNING_LINES.map do |line|
-      if line.include?(selected_danger_line[0]) &&
-         line.include?(selected_danger_line[1])
-        square = (line + selected_danger_line).tally.select { |_, v| v == 1 }
-                                              .keys[0]
-      end
-    end
-  else
+  square = nil
+  WINNING_LINES.each do |line|
+    square = find_danger_square(line, brd)
+    break if square
+  end
+
+  if !square
     square = empty_squares(brd).sample
   end
 
   brd[square] = COMPUTER_MARKER
 end
 
-def find_danger_line(brd)
-  filled_squares = WINNING_LINES.map do |sub_arr|
-    sub_arr.reject { |num| empty_squares(brd).include?(num) }
-  end
-
-  filled_squares.select do |sub_arr|
-    next false if sub_arr.size == 3
-    brd[sub_arr[0]] == PLAYER_MARKER && brd[sub_arr[1]] == PLAYER_MARKER
+def find_danger_square(line, brd)
+  if brd.values_at(*line).count(PLAYER_MARKER) == 2
+    brd.select { |k, v| line.include?(k) && v == INITIAL_MARKER }.keys.first
   end
 end
 
