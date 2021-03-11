@@ -1,5 +1,6 @@
 require 'pry'
 
+WHO_FIRST = 'player'
 INITIAL_MARKER = ' '
 PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
@@ -73,8 +74,19 @@ end
 def computer_places_piece!(brd)
   square = nil
   WINNING_LINES.each do |line|
-    square = find_danger_square(line, brd)
+    square = find_danger_square(line, brd, COMPUTER_MARKER)
     break if square
+  end
+
+  if !square
+    WINNING_LINES.each do |line|
+      square = find_danger_square(line, brd, PLAYER_MARKER)
+      break if square
+    end
+  end
+
+  if !square
+    square = 5 if brd[5] == INITIAL_MARKER
   end
 
   if !square
@@ -84,9 +96,35 @@ def computer_places_piece!(brd)
   brd[square] = COMPUTER_MARKER
 end
 
-def find_danger_square(line, brd)
-  if brd.values_at(*line).count(PLAYER_MARKER) == 2
+def find_danger_square(line, brd, marker)
+  if brd.values_at(*line).count(marker) == 2
     brd.select { |k, v| line.include?(k) && v == INITIAL_MARKER }.keys.first
+  end
+end
+
+def player_first(board, score)
+  loop do
+    display_board(board)
+    display_score(score)
+
+    player_places_piece!(board)
+    break if someone_won?(board) || board_full?(board)
+
+    computer_places_piece!(board)
+    break if someone_won?(board) || board_full?(board)
+  end
+end
+
+def computer_first(board, score)
+  loop do
+    display_board(board)
+    display_score(score)
+
+    computer_places_piece!(board)
+    break if someone_won?(board) || board_full?(board)
+
+    player_places_piece!(board)
+    break if someone_won?(board) || board_full?(board)
   end
 end
 
@@ -134,14 +172,21 @@ loop do
   loop do
     board = initialize_board
 
-    loop do
-      display_board(board)
-      display_score(score)
-      player_places_piece!(board)
-      break if someone_won?(board) || board_full?(board)
+    if WHO_FIRST == 'player'
+      player_first(board, score)
+    elsif WHO_FIRST == 'computer'
+      computer_first(board, score)
+    elsif WHO_FIRST == 'choose'
+      prompt("Should the player or computer go first?")
+      prompt("(Type 'player' or 'computer')")
+      answer = gets.chomp.downcase
 
-      computer_places_piece!(board)
-      break if someone_won?(board) || board_full?(board)
+      case answer
+      when 'player' then player_first(board, score)
+      when 'computer' then computer_first(board, score)
+      end
+    else
+      player_first(board, score)
     end
 
     clear_screen
