@@ -24,6 +24,9 @@
 # dealer cards: array  ^^^
 require 'pry'
 
+WIN_VALUE = 21
+DEALER_HIT_UNTIL = 17
+
 def prompt(message)
   puts(">> #{message}")
 end
@@ -70,7 +73,7 @@ def hit(deck, hand)
 end
 
 def busted?(total_hand)
-  total_hand > 21
+  total_hand > WIN_VALUE
 end
 
 def total(hand)
@@ -95,7 +98,7 @@ def calculate_aces(total, aces)
     break aces_total if high_aces < 0
 
     aces_total = (high_aces * 11) + (low_aces * 1)
-    if total + aces_total > 21
+    if total + aces_total > WIN_VALUE
       high_aces -= 1
       low_aces += 1
     else
@@ -126,7 +129,7 @@ end
 def player_turn(deck, player_hand, dealer_hand, totals)
   loop do
     display_hands(player_hand, dealer_hand, totals)
-    
+
     prompt("hit or stay?")
     answer = gets.chomp
     if answer == 'hit'
@@ -147,7 +150,7 @@ def dealer_turn(deck, dealer_hand, totals)
   return if dealer_total > player_total
 
   loop do
-    break if totals['dealer'] >= 17
+    break if totals['dealer'] >= DEALER_HIT_UNTIL
     hit(deck, dealer_hand)
     totals['dealer'] = total(dealer_hand)
   end
@@ -173,7 +176,7 @@ def display_hands(player_hand, dealer_hand, totals, results = false)
 end
 
 def display_rules
-  prompt("Whoever has the highest amount without going over 21 is the winner.")
+  prompt("Whoever has the highest amount without going over #{WIN_VALUE} is the winner.")
   prompt("If it is a tie, the dealer wins.")
   prompt("Jack, Queen, King cards are worth 10. Ace are worth 1 or 11.")
 end
