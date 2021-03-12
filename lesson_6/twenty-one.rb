@@ -25,8 +25,8 @@
 require 'pry'
 
 MATCHES_TO_WIN = 5
-WIN_VALUE = 21
-DEALER_HIT_UNTIL = 17
+WIN_VALUE = 31
+DEALER_HIT_UNTIL = 27
 
 def prompt(message)
   puts(">> #{message}")
@@ -231,7 +231,7 @@ end
 def play_again?
   prompt("Do you want to play again? (yes or no)")
   answer = gets.chomp.downcase
-  answer == 'yes' || 'y'
+  false unless answer == 'yes' || answer == 'y'
 end
 
 loop do
