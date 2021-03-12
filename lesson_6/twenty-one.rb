@@ -72,7 +72,7 @@ def hand_total(hand)
     total += card[1].to_i
   end
 
-  p aces_total = calculate_aces(total, aces)
+  aces_total = calculate_aces(total, aces)
   p total += aces_total
 end
 
@@ -108,16 +108,20 @@ def player_turn(deck, player_hand)
       hit(deck, player_hand)
     end
 
-    p player_hand
-
     break if answer == 'stay' || busted?(player_hand)
   end
 
   busted?(player_hand) ? return : prompt("You chose to stay!")
 end
 
-def dealer_turn(deck, dealer_hand)
+def dealer_turn(deck, dealer_hand, player_hand)
+  return if hand_total(dealer_hand) > hand_total(player_hand) ||
+            busted?(player_hand)
 
+  loop do
+    hit(deck, dealer_hand)
+    break if hand_total(dealer_hand) >= 17
+  end
 end
 
 loop do
@@ -125,12 +129,10 @@ loop do
   player_hand, dealer_hand = deal_cards(deck)
 
   player_turn(deck, player_hand)
-  if busted?(player_hand)
-    declare_winner(player_hand, dealer_hand)
-  else
-    dealer_turn(deck, dealer_hand)
-  end
-  # declare_winner(player_hand, dealer_hand)
+  # p player_hand
+  dealer_turn(deck, dealer_hand, player_hand)
+  # p dealer_hand
+  declare_winner(player_hand, dealer_hand)
 
   prompt("Do you want to play again? (yes or no)")
   answer = gets.chomp.downcase
