@@ -152,12 +152,20 @@ def dealer_turn(deck, dealer_hand, player_hand)
 end
 
 def display_hands(player_hand, dealer_hand, results = false)
-  if !results
-    puts "Dealer has: #{dealer_hand[0][1]} and an unknown card"
-  else
-    puts "Dealer has: #{join_and(dealer_hand.map { |card| card[1] })}"
+  royals = { 'J' => 'Jack', 'Q' => 'Queen', 'K' => 'King', 'A' => 'Ace' }
+  player_cards = player_hand.map do |card|
+    royals.keys.include?(card[1]) ? royals[card[1]] : card[1]
   end
-  puts "You have: #{join_and(player_hand.map { |card| card[1] })}"
+  dealer_cards = dealer_hand.map do |card|
+    royals.keys.include?(card[1]) ? royals[card[1]] : card[1]
+  end
+
+  if !results
+    puts "Dealer has: #{dealer_cards[0]} and an unknown card"
+  else
+    puts "Dealer has: #{join_and(dealer_cards)}"
+  end
+  puts "You have: #{join_and(player_cards)}"
 end
 
 def display_rules
