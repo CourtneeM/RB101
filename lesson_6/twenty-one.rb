@@ -1,7 +1,9 @@
 # 1. Initialize deck
-#  - 13 cards per suit(4)
-#  - create the deck by cycling through the suits and card numbers/faces
+#   - 13 cards per suit(4)
+#   - create the deck by cycling through the suits and card numbers/faces
 # 2. Deal cards to player and dealer
+#   - remove the dealt cards from the deck
+# ----------- above finished ----------------
 # 3. Player turn: hit or stay
 #   - repeat until bust or "stay"
 # 4. If player bust, dealer wins.
@@ -28,12 +30,31 @@ CARD_VALUES = { '1' => 1, '2' => 2, '3' => 3, '4' => 4, '5' => 5,
 def initialize_deck
   suits = ['H', 'D', 'C', 'S']
   numbers = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+  deck = []
 
-  suits.map do |suit|
-    numbers.map do |number|
-      [suit, number]
+  suits.each do |suit|
+    numbers.each do |number|
+      deck.push([suit, number])
     end
   end
+  deck
 end
 
-p initialize_deck
+def deal_cards(deck)
+  player_hand = deck.sample(2)
+  remove_dealt_cards_from_deck!(deck, player_hand)
+
+  dealer_hand = deck.sample(2)
+  remove_dealt_cards_from_deck!(deck, dealer_hand)
+
+  [player_hand, dealer_hand]
+end
+
+def remove_dealt_cards_from_deck!(deck, hand)
+  hand.each { |card| deck.delete(card) }
+end
+
+deck = initialize_deck
+player_hand, dealer_hand = deal_cards(deck)
+p player_hand
+p dealer_hand
