@@ -119,11 +119,23 @@ def who_won?(totals)
   end
 end
 
-def declare_winner(winner)
+def display_round_winner(winner)
   case winner
   when 'dealer' then prompt("The dealer wins!")
   when 'player' then prompt("The player wins!")
   end
+end
+
+def display_match_winner(totals)
+  if totals['player'] == 5
+    prompt("Player is the match winner!")
+  else
+    prompt("Dealer is the match winner!")
+  end
+end
+
+def increment(round_totals, winner)
+  round_totals[winner] += 1
 end
 
 def player_turn(deck, player_hand, dealer_hand, totals)
@@ -182,23 +194,35 @@ def display_rules
 end
 
 def play_game
-  deck = initialize_deck
-  player_hand, dealer_hand = deal_cards(deck)
-  totals = { 'player' => total(player_hand), 'dealer' => total(dealer_hand) }
+  round_totals = { 'player' => 0, 'dealer' => 0 }
+  loop do
+    deck = initialize_deck
+    player_hand, dealer_hand = deal_cards(deck)
+    totals = { 'player' => total(player_hand), 'dealer' => total(dealer_hand) }
 
-  player_turn(deck, player_hand, dealer_hand, totals)
-  if busted?(totals['player'])
-    display_hands(player_hand, dealer_hand, totals)
-    return prompt("You busted! Dealer wins!")
-  else
-    dealer_turn(deck, dealer_hand, totals)
-  end
+    player_turn(deck, player_hand, dealer_hand, totals)
+    if busted?(totals['player'])
+      display_hands(player_hand, dealer_hand, totals)
+      prompt("You busted! Dealer wins!")
+      increment(round_totals, who_won?(totals))
+      break display_match_winner(totals) if round_totals.values.include?(5)
+      next
+    else
+      dealer_turn(deck, dealer_hand, totals)
+    end
 
-  display_hands(player_hand, dealer_hand, totals, true)
-  if busted?(totals['dealer'])
-    prompt("Dealer busted! You win!")
-  else
-    declare_winner(who_won?(totals))
+    display_hands(player_hand, dealer_hand, totals, true)
+    if busted?(totals['dealer'])
+      prompt("Dealer busted! You win!")
+      increment(round_totals, who_won?(totals))
+      break display_match_winner(totals) if round_totals.values.include?(5)
+      next
+    else
+      display_round_winner(who_won?(totals))
+      increment(round_totals, who_won?(totals))
+    end
+    binding.pry
+    break display_match_winner(totals) if round_totals.values.include?(5)
   end
 end
 
