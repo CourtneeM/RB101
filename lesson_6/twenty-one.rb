@@ -24,6 +24,7 @@
 # dealer cards: array  ^^^
 require 'pry'
 
+MATCHES_TO_WIN = 5
 WIN_VALUE = 21
 DEALER_HIT_UNTIL = 17
 
@@ -188,7 +189,8 @@ def display_hands(player_hand, dealer_hand, totals, results = false)
 end
 
 def display_rules
-  prompt("Whoever has the highest amount without going over #{WIN_VALUE} is the winner.")
+  prompt("Win #{MATCHES_TO_WIN} rounds to win the match.")
+  prompt("Whoever has the highest amount without going over #{WIN_VALUE} is the round winner.")
   prompt("If it is a tie, the dealer wins.")
   prompt("Jack, Queen, King cards are worth 10. Ace are worth 1 or 11.")
 end
@@ -221,7 +223,7 @@ def play_game
       display_round_winner(who_won?(totals))
       increment(round_totals, who_won?(totals))
     end
-    binding.pry
+
     break display_match_winner(totals) if round_totals.values.include?(5)
   end
 end
@@ -229,7 +231,7 @@ end
 def play_again?
   prompt("Do you want to play again? (yes or no)")
   answer = gets.chomp.downcase
-  answer == 'yes'
+  answer == 'yes' || 'y'
 end
 
 loop do
