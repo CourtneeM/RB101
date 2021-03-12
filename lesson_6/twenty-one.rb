@@ -22,6 +22,7 @@
 # deck: nested array [['H', 5], ['C', 1], ['S', 'Q']]
 # player cards: array (for aces, include [1, 11] and decide which one to use when needed)
 # dealer cards: array  ^^^
+require 'pry'
 
 def prompt(message)
   puts(">> #{message}")
@@ -43,14 +44,10 @@ end
 def initialize_deck
   suits = ['H', 'D', 'C', 'S']
   numbers = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
-  deck = []
 
-  suits.each do |suit|
-    numbers.each do |number|
-      deck.push([suit, number])
-    end
+  suits.each_with_object([]) do |suit, deck|
+    numbers.each { |number| deck.push([suit, number]) }
   end
-  deck
 end
 
 def deal_cards(deck)
@@ -72,11 +69,11 @@ def hit(deck, hand)
   remove_dealt_cards_from_deck!(deck, hand)
 end
 
-def busted?(hand)
-  hand_total(hand) > 21
+def busted?(total_hand)
+  total_hand > 21
 end
 
-def hand_total(hand)
+def total(hand)
   total = 0
   aces = 0
   hand.map do |card|
@@ -107,12 +104,14 @@ def calculate_aces(total, aces)
   end
 end
 
-def who_won?(player_hand, dealer_hand)
-  if busted?(player_hand) ||
-     hand_total(dealer_hand) >= hand_total(player_hand)
+def who_won?(totals)
+  player_total, dealer_total = totals.values_at('player', 'dealer')
+
+  if busted?(player_total) ||
+     dealer_total >= player_total
     'dealer'
-  elsif busted?(dealer_hand) ||
-        hand_total(player_hand) > hand_total(dealer_hand)
+  elsif busted?(dealer_total) ||
+        player_total > dealer_total
     'player'
   end
 end
@@ -124,34 +123,38 @@ def declare_winner(winner)
   end
 end
 
-def player_turn(deck, player_hand, dealer_hand)
+def player_turn(deck, player_hand, dealer_hand, totals)
   loop do
-    display_hands(player_hand, dealer_hand)
-
+    display_hands(player_hand, dealer_hand, totals)
+    
     prompt("hit or stay?")
     answer = gets.chomp
     if answer == 'hit'
       hit(deck, player_hand)
+      totals['player'] = total(player_hand)
     end
 
     clear_screen
-    return if busted?(player_hand)
+    return if busted?(totals['player'])
     break if answer == 'stay'
   end
 
   prompt("You chose to stay!")
 end
 
-def dealer_turn(deck, dealer_hand, player_hand)
-  return if hand_total(dealer_hand) > hand_total(player_hand)
+def dealer_turn(deck, dealer_hand, totals)
+  player_total, dealer_total = totals.values_at('player', 'dealer')
+  return if dealer_total > player_total
 
   loop do
-    break if hand_total(dealer_hand) >= 17
+    break if totals['dealer'] >= 17
     hit(deck, dealer_hand)
+    totals['dealer'] = total(dealer_hand)
   end
 end
 
-def display_hands(player_hand, dealer_hand, results = false)
+def display_hands(player_hand, dealer_hand, totals, results = false)
+  player_total, dealer_total = totals.values_at('player', 'dealer')
   royals = { 'J' => 'Jack', 'Q' => 'Queen', 'K' => 'King', 'A' => 'Ace' }
   player_cards = player_hand.map do |card|
     royals.keys.include?(card[1]) ? royals[card[1]] : card[1]
@@ -159,44 +162,44 @@ def display_hands(player_hand, dealer_hand, results = false)
   dealer_cards = dealer_hand.map do |card|
     royals.keys.include?(card[1]) ? royals[card[1]] : card[1]
   end
-
+  puts "================================================================="
   if !results
     puts "Dealer has: #{dealer_cards[0]} and an unknown card"
   else
-    puts "Dealer has: #{join_and(dealer_cards)}"
+    puts "Dealer has: #{join_and(dealer_cards)} for a total of #{dealer_total}"
   end
-  puts "You have: #{join_and(player_cards)}"
+  puts "You have: #{join_and(player_cards)} for a total of #{player_total}"
+  puts "================================================================="
 end
 
 def display_rules
   prompt("Whoever has the highest amount without going over 21 is the winner.")
   prompt("If it is a tie, the dealer wins.")
   prompt("Jack, Queen, King cards are worth 10. Ace are worth 1 or 11.")
-  puts "------------------------------------------------------------------"
 end
 
 def play_game
   deck = initialize_deck
   player_hand, dealer_hand = deal_cards(deck)
+  totals = { 'player' => total(player_hand), 'dealer' => total(dealer_hand) }
 
-  player_turn(deck, player_hand, dealer_hand)
-  if busted?(player_hand)
-    display_hands(player_hand, dealer_hand)
+  player_turn(deck, player_hand, dealer_hand, totals)
+  if busted?(totals['player'])
+    display_hands(player_hand, dealer_hand, totals)
     return prompt("You busted! Dealer wins!")
   else
-    dealer_turn(deck, dealer_hand, player_hand)
+    dealer_turn(deck, dealer_hand, totals)
   end
 
-  display_hands(player_hand, dealer_hand, true)
-  if busted?(dealer_hand)
+  display_hands(player_hand, dealer_hand, totals, true)
+  if busted?(totals['dealer'])
     prompt("Dealer busted! You win!")
   else
-    declare_winner(who_won?(player_hand, dealer_hand))
+    declare_winner(who_won?(totals))
   end
 end
 
 def play_again?
-  puts "-----------------------------------------"
   prompt("Do you want to play again? (yes or no)")
   answer = gets.chomp.downcase
   answer == 'yes'
