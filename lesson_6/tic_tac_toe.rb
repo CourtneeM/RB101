@@ -1,7 +1,12 @@
+require 'pry'
+
 INITIAL_MARKER = ' '
 PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
 ROUNDS_TO_WIN = 5
+WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9],
+                 [1, 4, 7], [2, 5, 8], [3, 6, 9],
+                 [1, 5, 9], [3, 5, 7]]
 
 def clear_screen
   system('clear') || system('cls')
@@ -22,12 +27,17 @@ def prompt(message)
   puts "=> #{message}"
 end
 
+def display_round(round)
+  clear_screen
+  puts "Round ##{round}"
+end
+
 def display_score(score)
-  puts "Player: #{score['player']} | Computer: #{score['computer']}"
+  puts "[Player: #{score['player']} | Computer: #{score['computer']}]" +
+       " (First to #{ROUNDS_TO_WIN} wins)"
 end
 
 def display_board(board)
-  clear_screen
   puts "You're an #{PLAYER_MARKER}. Computer is #{COMPUTER_MARKER}."
   puts "     |     |"
   puts "  #{board[1]}  |  #{board[2]}  |  #{board[3]}"
@@ -66,8 +76,24 @@ def player_places_piece!(board)
 end
 
 def computer_places_piece!(board)
-  square = empty_squares(board).sample
+  square = find_danger_square(board)
+
+  if !square
+    square = empty_squares(board).sample
+  end
+
   board[square] = COMPUTER_MARKER
+end
+
+def find_danger_square(board)
+  danger_squares = []
+  WINNING_LINES.each do |line|
+    if board.values_at(*line).count(PLAYER_MARKER) == 2
+      danger_squares << line.select { |num| board[num] == ' ' }
+    end
+  end
+  danger_squares = danger_squares.reject(&:empty?)
+  danger_squares.empty? ? nil : danger_squares.sample.join.to_i
 end
 
 def board_full?(board)
@@ -79,11 +105,7 @@ def someone_won_round?(board)
 end
 
 def detect_round_winner(board)
-  winning_lines = [[1, 2, 3], [4, 5, 6], [7, 8, 9],
-                   [1, 4, 7], [2, 5, 8], [3, 6, 9],
-                   [1, 5, 9], [3, 5, 7]]
-
-  winning_lines.each do |line|
+  WINNING_LINES.each do |line|
     if board.values_at(*line).count(PLAYER_MARKER) == 3
       return 'Player'
     elsif board.values_at(*line).count(COMPUTER_MARKER) == 3
@@ -106,23 +128,34 @@ def increment_score(score, winner)
   score[winner.downcase] += 1
 end
 
+def next_round
+  puts "==================================="
+  prompt("Press enter to start next round.")
+  gets.chomp
+end
+
 loop do
   score = { 'player' => 0, 'computer' => 0 }
+  round = 1
   loop do
     board = initialize_board
+    display_round(round)
     display_board(board)
 
     loop do
       display_score(score)
       player_places_piece!(board)
+      display_round(round)
       display_board(board)
       break if someone_won_round?(board) || board_full?(board)
 
       computer_places_piece!(board)
+      display_round(round)
       display_board(board)
       break if someone_won_round?(board) || board_full?(board)
     end
 
+    display_round(round)
     display_board(board)
 
     if someone_won_round?(board)
@@ -138,6 +171,9 @@ loop do
       puts "#{detect_match_winner(score)} is the match winner!"
       break
     end
+
+    round += 1
+    next_round
   end
 
   prompt("Play again? (y or n)")
