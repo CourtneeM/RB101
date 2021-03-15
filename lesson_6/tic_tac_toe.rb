@@ -1,6 +1,7 @@
 INITIAL_MARKER = ' '
 PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
+ROUNDS_TO_WIN = 5
 
 def clear_screen
   system('clear') || system('cls')
@@ -19,6 +20,10 @@ end
 
 def prompt(message)
   puts "=> #{message}"
+end
+
+def display_score(score)
+  puts "Player: #{score['player']} | Computer: #{score['computer']}"
 end
 
 def display_board(board)
@@ -69,11 +74,11 @@ def board_full?(board)
   empty_squares(board).empty?
 end
 
-def someone_won?(board)
-  !!detect_winner(board)
+def someone_won_round?(board)
+  !!detect_round_winner(board)
 end
 
-def detect_winner(board)
+def detect_round_winner(board)
   winning_lines = [[1, 2, 3], [4, 5, 6], [7, 8, 9],
                    [1, 4, 7], [2, 5, 8], [3, 6, 9],
                    [1, 5, 9], [3, 5, 7]]
@@ -88,26 +93,51 @@ def detect_winner(board)
   nil
 end
 
+def someone_won_match?(score)
+  !!detect_match_winner(score)
+end
+
+def detect_match_winner(score)
+  return 'Player' if score['player'] == ROUNDS_TO_WIN
+  return 'Computer' if score['computer'] == ROUNDS_TO_WIN
+end
+
+def increment_score(score, winner)
+  score[winner.downcase] += 1
+end
+
 loop do
-  board = initialize_board
-  display_board(board)
-
+  score = { 'player' => 0, 'computer' => 0 }
   loop do
-    player_places_piece!(board)
+    board = initialize_board
     display_board(board)
-    break if someone_won?(board) || board_full?(board)
 
-    computer_places_piece!(board)
+    loop do
+      display_score(score)
+      player_places_piece!(board)
+      display_board(board)
+      break if someone_won_round?(board) || board_full?(board)
+
+      computer_places_piece!(board)
+      display_board(board)
+      break if someone_won_round?(board) || board_full?(board)
+    end
+
     display_board(board)
-    break if someone_won?(board) || board_full?(board)
-  end
 
-  display_board(board)
+    if someone_won_round?(board)
+      prompt("#{detect_round_winner(board)} won!")
+      increment_score(score, detect_round_winner(board))
+      display_score(score)
+    else
+      prompt("It's a tie!")
+    end
 
-  if someone_won?(board)
-    prompt("#{detect_winner(board)} won!")
-  else
-    prompt("It's a tie!")
+    if someone_won_match?(score)
+      puts "============================"
+      puts "#{detect_match_winner(score)} is the match winner!"
+      break
+    end
   end
 
   prompt("Play again? (y or n)")
