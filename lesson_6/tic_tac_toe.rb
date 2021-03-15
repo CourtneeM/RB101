@@ -6,6 +6,17 @@ def clear_screen
   system('clear') || system('cls')
 end
 
+def joinor(arr, separator = ', ', joining = 'or')
+  if arr.size < 2
+    arr.join
+  elsif arr.size == 2
+    "#{arr[0]} #{joining} #{arr[1]}"
+  else
+    arr = arr.join(separator)
+    arr.split.insert(-2, joining).join(' ')
+  end
+end
+
 def prompt(message)
   puts "=> #{message}"
 end
@@ -38,7 +49,7 @@ end
 def player_places_piece!(board)
   square = ''
   loop do
-    prompt("Choose a square (#{empty_squares(board).join(', ')})")
+    prompt("Choose a square (#{joinor(empty_squares(board))})")
     square = gets.chomp.to_i
     if empty_squares(board).include?(square)
       break
