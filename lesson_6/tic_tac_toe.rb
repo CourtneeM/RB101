@@ -1,10 +1,8 @@
-require 'pry'
-
 FIRST_MOVE = 'player'
 INITIAL_MARKER = ' '
 PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
-ROUNDS_TO_WIN = 5
+ROUNDS_TO_WIN = 2
 WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9],
                  [1, 4, 7], [2, 5, 8], [3, 6, 9],
                  [1, 5, 9], [3, 5, 7]]
@@ -59,8 +57,16 @@ def display_info(round, board)
   display_board(board)
 end
 
+def next_round_prompt
+  puts "==================================="
+  prompt("Press enter to start next round.")
+  gets.chomp
+end
+
 def initialize_board
-  (1..9).each_with_object({}) { |num, new_board| new_board[num] = INITIAL_MARKER }
+  (1..9).each_with_object({}) do |num, new_board|
+    new_board[num] = INITIAL_MARKER
+  end
 end
 
 def empty_squares(board)
@@ -146,49 +152,67 @@ def increment_score(score, winner)
   score[winner.downcase] += 1
 end
 
-def next_round
-  puts "==================================="
-  prompt("Press enter to start next round.")
-  gets.chomp
+def who_goes_first?
+  loop do
+    clear_screen
+    prompt("Who should go first? (player or computer)")
+    first_player = gets.chomp
+    if first_player == 'player' || first_player == 'computer'
+      return first_player
+    end
+  end
+end
+
+def play_round(round, score, board, current_player)
+  loop do
+    display_info(round, board)
+    display_score(score)
+    place_piece!(board, current_player)
+    current_player = alternate_player(current_player)
+    break if someone_won_round?(board) || board_full?(board)
+  end
+end
+
+def round_end(score, board)
+  if someone_won_round?(board)
+    prompt("#{detect_round_winner(board)} won!")
+    increment_score(score, detect_round_winner(board))
+    display_score(score)
+  else
+    prompt("It's a tie!")
+  end
+end
+
+def play_again?
+  loop do
+    prompt("Play again? (y or n)")
+    answer = gets.chomp
+    if answer == 'yes' || answer == 'y'
+      return answer
+    elsif answer == 'no' || answer == 'n'
+      return false
+    end
+    prompt("Please input a valid answer.")
+  end
 end
 
 loop do
   score = { 'player' => 0, 'computer' => 0 }
   round = 1
+  first_player = FIRST_MOVE
   loop do
     board = initialize_board
-    current_player = FIRST_MOVE
-    display_info(round, board)
-    loop do
-      display_score(score)
+    current_player = first_player
 
-      if current_player == 'player' || current_player == 'computer'
-        place_piece!(board, current_player)
-        current_player = alternate_player(current_player)
-        display_info(round, board)
-        break if someone_won_round?(board) || board_full?(board)
-      elsif current_player == 'choose'
-        loop do
-          clear_screen
-          prompt("Who should go first? (player or computer)")
-          current_player = gets.chomp
-          if current_player == 'player' || current_player == 'computer'
-            display_info(round, board)
-            break
-          end
-        end
-      end
+    if current_player == 'player' || current_player == 'computer'
+      play_round(round, score, board, current_player)
+    elsif current_player == 'choose'
+      first_player = who_goes_first?
+      next
     end
 
     display_info(round, board)
-
-    if someone_won_round?(board)
-      prompt("#{detect_round_winner(board)} won!")
-      increment_score(score, detect_round_winner(board))
-      display_score(score)
-    else
-      prompt("It's a tie!")
-    end
+    round_end(score, board)
 
     if someone_won_match?(score)
       puts "=============================="
@@ -197,12 +221,10 @@ loop do
     end
 
     round += 1
-    next_round
+    next_round_prompt
   end
 
-  prompt("Play again? (y or n)")
-  answer = gets.chomp
-  break unless answer.downcase.start_with?('y')
+  break unless play_again?
 end
 
 prompt("Thanks for playing Tic Tac Toe. Goodbye!")
