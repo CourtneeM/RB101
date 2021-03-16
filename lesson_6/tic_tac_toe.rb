@@ -1,4 +1,4 @@
-FIRST_MOVE = 'choose'
+FIRST_MOVE = 'player'
 INITIAL_MARKER = ' '
 PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
@@ -220,7 +220,7 @@ loop do
     if current_player == 'player' || current_player == 'computer'
       play_round(round, score, board, current_player)
     elsif current_player == 'choose'
-      first_player = who_goes_first?
+      first_player = who_goes_first
       next
     end
 
