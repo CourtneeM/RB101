@@ -1,5 +1,6 @@
 require 'pry'
 
+FIRST_MOVE = 'player'
 INITIAL_MARKER = ' '
 PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
@@ -76,8 +77,9 @@ def player_places_piece!(board)
 end
 
 def computer_places_piece!(board)
-  square = find_danger_square(board, PLAYER_MARKER)
-  square = find_danger_square(board, COMPUTER_MARKER) if !square
+  square = find_danger_square(board, COMPUTER_MARKER)
+  square = find_danger_square(board, PLAYER_MARKER) if !square
+  square = 5 if !square && board[5] == INITIAL_MARKER
   square = empty_squares(board).sample if !square
   board[square] = COMPUTER_MARKER
 end
@@ -138,18 +140,41 @@ loop do
     board = initialize_board
     display_round(round)
     display_board(board)
-
+    who_first = FIRST_MOVE
     loop do
       display_score(score)
-      player_places_piece!(board)
-      display_round(round)
-      display_board(board)
-      break if someone_won_round?(board) || board_full?(board)
 
-      computer_places_piece!(board)
-      display_round(round)
-      display_board(board)
-      break if someone_won_round?(board) || board_full?(board)
+      case who_first || FIRST_MOVE
+      when 'player'
+        player_places_piece!(board)
+        display_round(round)
+        display_board(board)
+        break if someone_won_round?(board) || board_full?(board)
+        computer_places_piece!(board)
+        display_round(round)
+        display_board(board)
+        break if someone_won_round?(board) || board_full?(board)
+      when 'computer'
+        computer_places_piece!(board)
+        display_round(round)
+        display_board(board)
+        break if someone_won_round?(board) || board_full?(board)
+        player_places_piece!(board)
+        display_round(round)
+        display_board(board)
+        break if someone_won_round?(board) || board_full?(board)
+      when 'choose'
+        loop do
+          clear_screen
+          prompt("Who should go first? (player or computer)")
+          who_first = gets.chomp
+          if who_first == 'player' || who_first == 'computer'
+            display_round(round)
+            display_board(board)
+            break
+          end
+        end
+      end
     end
 
     display_round(round)
@@ -164,7 +189,7 @@ loop do
     end
 
     if someone_won_match?(score)
-      puts "============================"
+      puts "=============================="
       puts "#{detect_match_winner(score)} is the match winner!"
       break
     end
