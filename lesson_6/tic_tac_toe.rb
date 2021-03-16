@@ -3,6 +3,7 @@ INITIAL_MARKER = ' '
 PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
 ROUNDS_TO_WIN = 5
+BOARD_SIZE = 3
 WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9],
                  [1, 4, 7], [2, 5, 8], [3, 6, 9],
                  [1, 5, 9], [3, 5, 7]]
@@ -121,7 +122,7 @@ end
 def find_danger_square(board, marker)
   danger_squares = []
   WINNING_LINES.each do |line|
-    if board.values_at(*line).count(marker) == 2
+    if board.values_at(*line).count(marker) == (BOARD_SIZE - 1)
       danger_squares << line.select { |num| board[num] == INITIAL_MARKER }
     end
   end
@@ -139,9 +140,9 @@ end
 
 def detect_round_winner(board)
   WINNING_LINES.each do |line|
-    if board.values_at(*line).count(PLAYER_MARKER) == 3
+    if board.values_at(*line).count(PLAYER_MARKER) == BOARD_SIZE
       return 'Player'
-    elsif board.values_at(*line).count(COMPUTER_MARKER) == 3
+    elsif board.values_at(*line).count(COMPUTER_MARKER) == BOARD_SIZE
       return 'Computer'
     end
   end
@@ -161,7 +162,7 @@ def increment_score(score, winner)
   score[winner.downcase] += 1
 end
 
-def who_goes_first?
+def who_goes_first
   loop do
     prompt("Who should go first? (player or computer)")
     first_player = gets.chomp
