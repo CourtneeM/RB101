@@ -54,6 +54,11 @@ def display_board(board)
   puts ""
 end
 
+def display_info(round, board)
+  display_round(round)
+  display_board(board)
+end
+
 def initialize_board
   (1..9).each_with_object({}) { |num, new_board| new_board[num] = INITIAL_MARKER }
 end
@@ -138,8 +143,7 @@ loop do
   round = 1
   loop do
     board = initialize_board
-    display_round(round)
-    display_board(board)
+    display_info(round, board)
     who_first = FIRST_MOVE
     loop do
       display_score(score)
@@ -147,21 +151,17 @@ loop do
       case who_first || FIRST_MOVE
       when 'player'
         player_places_piece!(board)
-        display_round(round)
-        display_board(board)
+        display_info(round, board)
         break if someone_won_round?(board) || board_full?(board)
         computer_places_piece!(board)
-        display_round(round)
-        display_board(board)
+        display_info(round, board)
         break if someone_won_round?(board) || board_full?(board)
       when 'computer'
         computer_places_piece!(board)
-        display_round(round)
-        display_board(board)
+        display_info(round, board)
         break if someone_won_round?(board) || board_full?(board)
         player_places_piece!(board)
-        display_round(round)
-        display_board(board)
+        display_info(round, board)
         break if someone_won_round?(board) || board_full?(board)
       when 'choose'
         loop do
@@ -169,16 +169,14 @@ loop do
           prompt("Who should go first? (player or computer)")
           who_first = gets.chomp
           if who_first == 'player' || who_first == 'computer'
-            display_round(round)
-            display_board(board)
+            display_info(round, board)
             break
           end
         end
       end
     end
 
-    display_round(round)
-    display_board(board)
+    display_info(round, board)
 
     if someone_won_round?(board)
       prompt("#{detect_round_winner(board)} won!")
