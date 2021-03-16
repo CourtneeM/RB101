@@ -12,12 +12,31 @@
 # - deck: nested array [['H', '2'], ['C', 'A'], ['S', '9']]
 # - player / dealer cards: array
 
+require 'pry'
+
+TARGET_NUM = 21
+DEALER_HIT_UNTIL = 17
+
 def clear_screen
   system('clear') || system('cls')
 end
 
 def prompt(message)
   puts "=> #{message}"
+end
+
+def display_welcome
+  prompt("Welcome to Twenty-One!")
+  prompt("Closest to #{TARGET_NUM} without going over wins.")
+  puts "========================================="
+end
+
+def display_hands(player_hand, dealer_hand, totals)
+  dealer_values = dealer_hand.map { |card| card[1] }
+  player_values = player_hand.map { |card| card[1] }
+
+  puts "Dealer has: #{dealer_values[0]} and unknown card"
+  puts "You have: #{player_values.join(', ')} for a total of #{totals['player']}"
 end
 
 def initialize_deck
@@ -35,14 +54,16 @@ def deal_cards(deck)
   [player_hand, dealer_hand]
 end
 
-def player_turn(player_hand, deck, totals)
+def player_turn(player_hand, dealer_hand, deck, totals)
   loop do
+    display_hands(player_hand, dealer_hand, totals)
     prompt("Hit or stay?")
     answer = gets.chomp # validate
+    # display hand and total
+
+    break if answer == 'stay' #|| busted?
     player_hand << deck.pop
     totals['player'] = get_total(player_hand)
-    # display hand and total
-    break if answer == 'stay' #|| busted?
   end
 
   # if busted?
@@ -52,9 +73,13 @@ def player_turn(player_hand, deck, totals)
   # end
 end
 
-# def dealer_turn(dealer_hand)
-
-# end
+def dealer_turn(dealer_hand, player_hand, deck, totals)
+  loop do
+    break if totals['dealer'] >= DEALER_HIT_UNTIL
+    dealer_hand << deck.pop
+    totals['dealer'] = get_total(dealer_hand)
+  end
+end
 
 def get_total(hand) # need to handle royals
   values = hand.map { |card| card[1].to_i }
@@ -75,13 +100,15 @@ def play_again?
 end
 
 loop do
+  display_welcome
+
   deck = initialize_deck
   player_hand, dealer_hand = deal_cards(deck)
   totals = { 'player' => get_total(player_hand),
              'dealer' => get_total(dealer_hand) }
 
-  player_turn(player_hand, deck, totals)
-  p totals
+  player_turn(player_hand, dealer_hand, deck, totals)
+  dealer_turn(dealer_hand, player_hand, deck, totals)
 
   break unless play_again?
 end
