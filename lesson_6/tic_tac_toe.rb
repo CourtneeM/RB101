@@ -95,8 +95,12 @@ end
 def player_places_piece!(board)
   square = ''
   loop do
-    prompt("Choose a square (#{joinor(empty_squares(board))})")
-    square = gets.chomp.to_i
+    loop do
+      prompt("Choose a square (#{joinor(empty_squares(board))})")
+      square = gets.chomp
+      break square = square.to_i if square.to_i.to_s == square
+      prompt("#{square} is not a valid choice.")
+    end
     if empty_squares(board).include?(square)
       break
     else
