@@ -26,14 +26,24 @@ def prompt(message)
   puts "=> #{message}"
 end
 
-def display_round(round)
+def display_welcome_message
   clear_screen
+  puts "================================================="
+  puts "Welcome to Tic Tac Toe! First to #{ROUNDS_TO_WIN} is the winner."
+  puts "================================================="
+end
+
+def display_round(round)
   puts "Round ##{round}"
 end
 
 def display_score(score)
-  puts "[Player: #{score['player']} | Computer: #{score['computer']}]" \
-       " (First to #{ROUNDS_TO_WIN} wins)"
+  puts "[Player: #{score['player']} | Computer: #{score['computer']}]"
+end
+
+def display_info(round, board)
+  display_round(round)
+  display_board(board)
 end
 
 def display_board(board)
@@ -50,11 +60,6 @@ def display_board(board)
   puts "  #{board[7]}  |  #{board[8]}  |  #{board[9]}"
   puts "     |     |"
   puts ""
-end
-
-def display_info(round, board)
-  display_round(round)
-  display_board(board)
 end
 
 def next_round_prompt
@@ -200,7 +205,7 @@ loop do
   score = { 'player' => 0, 'computer' => 0 }
   round = 1
   first_player = FIRST_MOVE
-
+  display_welcome_message
   loop do
     board = initialize_board
     current_player = first_player
@@ -223,6 +228,7 @@ loop do
 
     round += 1
     next_round_prompt
+    clear_screen
   end
 
   break unless play_again?
