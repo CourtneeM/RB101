@@ -1,4 +1,4 @@
-FIRST_MOVE = 'player'
+FIRST_MOVE = 'choose'
 INITIAL_MARKER = ' '
 PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
@@ -159,12 +159,13 @@ end
 
 def who_goes_first?
   loop do
-    clear_screen
     prompt("Who should go first? (player or computer)")
     first_player = gets.chomp
     if first_player == 'player' || first_player == 'computer'
+      clear_screen
       return first_player
     end
+    prompt("That's not a valid choice.")
   end
 end
 
@@ -174,6 +175,7 @@ def play_round(round, score, board, current_player)
     display_score(score)
     place_piece!(board, current_player)
     current_player = alternate_player(current_player)
+    clear_screen
     break if someone_won_round?(board) || board_full?(board)
   end
 end
