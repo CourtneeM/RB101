@@ -35,6 +35,32 @@ def deal_cards(deck)
   [player_hand, dealer_hand]
 end
 
+def player_turn(player_hand, deck, totals)
+  loop do
+    prompt("Hit or stay?")
+    answer = gets.chomp # validate
+    player_hand << deck.pop
+    totals['player'] = get_total(player_hand)
+    # display hand and total
+    break if answer == 'stay' #|| busted?
+  end
+
+  # if busted?
+  #   play_again?
+  # else
+  #   puts "You chose to stay!"
+  # end
+end
+
+# def dealer_turn(dealer_hand)
+
+# end
+
+def get_total(hand) # need to handle royals
+  values = hand.map { |card| card[1].to_i }
+  values.sum
+end
+
 def play_again?
   loop do
     prompt("Do you want to play again? (yes or no)")
@@ -51,6 +77,11 @@ end
 loop do
   deck = initialize_deck
   player_hand, dealer_hand = deal_cards(deck)
+  totals = { 'player' => get_total(player_hand),
+             'dealer' => get_total(dealer_hand) }
+
+  player_turn(player_hand, deck, totals)
+  p totals
 
   break unless play_again?
 end
