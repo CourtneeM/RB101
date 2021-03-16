@@ -76,20 +76,17 @@ def player_places_piece!(board)
 end
 
 def computer_places_piece!(board)
-  square = find_danger_square(board)
-
-  if !square
-    square = empty_squares(board).sample
-  end
-
+  square = find_danger_square(board, PLAYER_MARKER)
+  square = find_danger_square(board, COMPUTER_MARKER) if !square
+  square = empty_squares(board).sample if !square
   board[square] = COMPUTER_MARKER
 end
 
-def find_danger_square(board)
+def find_danger_square(board, marker)
   danger_squares = []
   WINNING_LINES.each do |line|
-    if board.values_at(*line).count(PLAYER_MARKER) == 2
-      danger_squares << line.select { |num| board[num] == ' ' }
+    if board.values_at(*line).count(marker) == 2
+      danger_squares << line.select { |num| board[num] == INITIAL_MARKER }
     end
   end
   danger_squares = danger_squares.reject(&:empty?)
