@@ -20,6 +20,21 @@ def prompt(message)
   puts "=> #{message}"
 end
 
+def initialize_deck
+  suits = ['H', 'D', 'C', 'S']
+  values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+  suits.product(values).shuffle
+end
+
+def deal_cards(deck)
+  player_hand = []
+  dealer_hand = []
+
+  2.times { [player_hand, dealer_hand].each { |hand| hand << deck.pop } }
+
+  [player_hand, dealer_hand]
+end
+
 def play_again?
   loop do
     prompt("Do you want to play again? (yes or no)")
@@ -34,6 +49,9 @@ def play_again?
 end
 
 loop do
+  deck = initialize_deck
+  player_hand, dealer_hand = deal_cards(deck)
+
   break unless play_again?
 end
 
