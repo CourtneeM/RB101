@@ -67,6 +67,20 @@ def empty_squares(board)
   board.keys.select { |num| board[num] == INITIAL_MARKER }
 end
 
+def alternate_player(current_player)
+  case current_player
+  when 'player' then 'computer'
+  when 'computer' then 'player'
+  end
+end
+
+def place_piece!(board, current_player)
+  case current_player
+  when 'player' then player_places_piece!(board)
+  when 'computer' then computer_places_piece!(board)
+  end
+end
+
 def player_places_piece!(board)
   square = ''
   loop do
@@ -143,32 +157,22 @@ loop do
   round = 1
   loop do
     board = initialize_board
+    current_player = FIRST_MOVE
     display_info(round, board)
-    who_first = FIRST_MOVE
     loop do
       display_score(score)
 
-      case who_first || FIRST_MOVE
-      when 'player'
-        player_places_piece!(board)
+      if current_player == 'player' || current_player == 'computer'
+        place_piece!(board, current_player)
+        current_player = alternate_player(current_player)
         display_info(round, board)
         break if someone_won_round?(board) || board_full?(board)
-        computer_places_piece!(board)
-        display_info(round, board)
-        break if someone_won_round?(board) || board_full?(board)
-      when 'computer'
-        computer_places_piece!(board)
-        display_info(round, board)
-        break if someone_won_round?(board) || board_full?(board)
-        player_places_piece!(board)
-        display_info(round, board)
-        break if someone_won_round?(board) || board_full?(board)
-      when 'choose'
+      elsif current_player == 'choose'
         loop do
           clear_screen
           prompt("Who should go first? (player or computer)")
-          who_first = gets.chomp
-          if who_first == 'player' || who_first == 'computer'
+          current_player = gets.chomp
+          if current_player == 'player' || current_player == 'computer'
             display_info(round, board)
             break
           end
