@@ -2,7 +2,7 @@ FIRST_MOVE = 'player'
 INITIAL_MARKER = ' '
 PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
-ROUNDS_TO_WIN = 2
+ROUNDS_TO_WIN = 5
 WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9],
                  [1, 4, 7], [2, 5, 8], [3, 6, 9],
                  [1, 5, 9], [3, 5, 7]]
@@ -32,7 +32,7 @@ def display_round(round)
 end
 
 def display_score(score)
-  puts "[Player: #{score['player']} | Computer: #{score['computer']}]" +
+  puts "[Player: #{score['player']} | Computer: #{score['computer']}]" \
        " (First to #{ROUNDS_TO_WIN} wins)"
 end
 
@@ -75,14 +75,14 @@ end
 
 def alternate_player(current_player)
   case current_player
-  when 'player' then 'computer'
+  when 'player'   then 'computer'
   when 'computer' then 'player'
   end
 end
 
 def place_piece!(board, current_player)
   case current_player
-  when 'player' then player_places_piece!(board)
+  when 'player'   then player_places_piece!(board)
   when 'computer' then computer_places_piece!(board)
   end
 end
@@ -200,6 +200,7 @@ loop do
   score = { 'player' => 0, 'computer' => 0 }
   round = 1
   first_player = FIRST_MOVE
+
   loop do
     board = initialize_board
     current_player = first_player
