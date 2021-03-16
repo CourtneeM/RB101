@@ -197,9 +197,9 @@ end
 def play_again?
   loop do
     prompt("Play again? (y or n)")
-    answer = gets.chomp
+    answer = gets.chomp.downcase
     if answer == 'yes' || answer == 'y'
-      return answer
+      return true
     elsif answer == 'no' || answer == 'n'
       return false
     end
