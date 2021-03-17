@@ -31,11 +31,16 @@ def display_welcome
   puts "========================================="
 end
 
-def display_hands(player_hand, dealer_hand, totals)
-  dealer_values = dealer_hand.map { |card| card[1] }
-  player_values = player_hand.map { |card| card[1] }
+def display_hands(player_hand, dealer_hand, totals, results = false)
+  player_values = get_values(player_hand)
+  dealer_values = get_values(dealer_hand)
 
-  puts "Dealer has: #{dealer_values[0]} and unknown card"
+  case results
+  when true
+    puts "Dealer has: #{dealer_values.join(', ')} for a total of #{totals['dealer']}"
+  when false
+    puts "Dealer has: #{dealer_values[0]} and unknown card"
+  end
   puts "You have: #{player_values.join(', ')} for a total of #{totals['player']}"
 end
 
@@ -57,33 +62,59 @@ end
 def player_turn(player_hand, dealer_hand, deck, totals)
   loop do
     display_hands(player_hand, dealer_hand, totals)
-    prompt("Hit or stay?")
-    answer = gets.chomp # validate
-    # display hand and total
 
-    break if answer == 'stay' #|| busted?
-    player_hand << deck.pop
-    totals['player'] = get_total(player_hand)
+    case hit_or_stay
+    when :hit
+      hit(player_hand, deck, totals, 'player')
+      break if busted?(totals, 'player')
+    when :stay
+      break
+    end
   end
 
-  # if busted?
-  #   play_again?
-  # else
-  #   puts "You chose to stay!"
-  # end
+  if busted?(totals, 'player')
+    play_again?
+  else
+    puts "You chose to stay!"
+  end
 end
 
 def dealer_turn(dealer_hand, player_hand, deck, totals)
   loop do
-    break if totals['dealer'] >= DEALER_HIT_UNTIL
-    dealer_hand << deck.pop
-    totals['dealer'] = get_total(dealer_hand)
+    break if totals['dealer'] >= DEALER_HIT_UNTIL || busted?(totals, 'dealer')
+    hit(dealer_hand, deck, totals, 'dealer')
   end
 end
 
-def get_total(hand) # need to handle royals
-  values = hand.map { |card| card[1].to_i }
-  values.sum
+def hit_or_stay
+  loop do
+    prompt("Hit or stay?")
+    answer = gets.chomp.downcase
+
+    if answer == 'hit' || answer == 'h'
+      return :hit
+    elsif answer == 'stay' || answer == 's'
+      return :stay
+    end
+    prompt("That's not a valid choice.")
+  end
+end
+
+def hit(hand, deck, totals, current_player)
+  hand << deck.pop
+  totals[current_player] = get_total(get_values(hand))
+end
+
+def busted?(totals, current_player)
+  totals[current_player] > 21
+end
+
+def get_values(hand)
+  hand.map { |card| card[1] }
+end
+
+def get_total(hand_values) # need to handle royals
+  hand_values.map(&:to_i).sum
 end
 
 def play_again?
@@ -104,11 +135,12 @@ loop do
 
   deck = initialize_deck
   player_hand, dealer_hand = deal_cards(deck)
-  totals = { 'player' => get_total(player_hand),
-             'dealer' => get_total(dealer_hand) }
+  totals = { 'player' => get_total(get_values(player_hand)),
+             'dealer' => get_total(get_values(dealer_hand)) }
 
   player_turn(player_hand, dealer_hand, deck, totals)
   dealer_turn(dealer_hand, player_hand, deck, totals)
+  display_hands(player_hand, dealer_hand, totals, true)
 
   break unless play_again?
 end
