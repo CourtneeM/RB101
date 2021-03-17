@@ -58,6 +58,10 @@ def display_scores(scores)
   puts "#{BORDER}\n#{spacing + message}\n#{BORDER}"
 end
 
+def display_rounds_played(round)
+  puts "Total Rounds Played: #{round}"
+end
+
 def initialize_deck
   suits = ['H', 'D', 'C', 'S']
   values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
@@ -211,6 +215,7 @@ end
 
 loop do
   display_welcome
+  round = 1
   scores = { 'player' => 0, 'dealer' => 0 }
 
   loop do
@@ -232,10 +237,13 @@ loop do
     display_round_winner(detect_round_winner(totals))
 
     break if match_winner?(scores)
+    display_rounds_played(round)
     next_round_prompt
+    round += 1
   end
 
   display_match_winner(detect_match_winner(scores))
+  display_rounds_played(round)
   break unless play_again?
 end
 
