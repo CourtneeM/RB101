@@ -70,7 +70,6 @@ def player_turn(player_hand, dealer_hand, deck, totals)
     case hit_or_stay
     when :hit
       hit(player_hand, deck, totals, 'player')
-      totals['player'] = total(values(player_hand))
       break if busted?(totals['player'])
       clear_screen
     when :stay
