@@ -1,8 +1,8 @@
-require 'pry'
-
 TARGET_NUM = 21
 DEALER_HIT_UNTIL = 17
 ROUNDS_TO_WIN = 5
+DOUBLE_BORDER = "=" * 42
+BORDER = "-" * 42
 
 def clear_screen
   system('clear') || system('cls')
@@ -23,18 +23,19 @@ end
 
 def display_welcome
   clear_screen
-  welcome = "Welcome to Twenty-One!"
+  welcome = "Welcome to Whatever-One!"
   rules = "Closest to #{TARGET_NUM} without going over wins."
-  border = "========================================="
-  spacing1 = "\s" * ((border.size - welcome.size) / 2)
-  spacing2 = "\s" * ((border.size - rules.size) / 2)
-  puts "#{border}\n#{spacing1 + welcome}\n#{spacing2 + rules}\n#{border}"
+  spacing1 = "\s" * ((DOUBLE_BORDER.size - welcome.size) / 2)
+  spacing2 = "\s" * ((DOUBLE_BORDER.size - rules.size) / 2)
+
+  puts "#{DOUBLE_BORDER}\n#{spacing1 + welcome}\n#{spacing2 + rules}\n#{DOUBLE_BORDER}"
 end
 
 def display_goodbye
-  puts "======================================="
-  puts "Thanks for playing Twenty-One! Goodbye."
-  puts "======================================="
+  message = "Thanks for playing Twenty-One! Goodbye."
+  spacing = "\s" * ((DOUBLE_BORDER.size - message.size) / 2)
+
+  puts "#{DOUBLE_BORDER}\n#{spacing + message}\n#{DOUBLE_BORDER}"
 end
 
 def display_hands(player_hand, dealer_hand, totals, results = false)
@@ -52,8 +53,9 @@ def display_hands(player_hand, dealer_hand, totals, results = false)
 end
 
 def display_scores(scores)
-  puts "[Player: #{scores['player']} | Dealer: #{scores['dealer']}]"
-  puts "-----------------------"
+  message = "Player: #{scores['player']} | Dealer: #{scores['dealer']}"
+  spacing = "\s" * ((BORDER.size - message.size) / 2)
+  puts "#{BORDER}\n#{spacing + message}\n#{BORDER}"
 end
 
 def initialize_deck
@@ -164,9 +166,8 @@ def display_round_winner(winner)
             when :player then "You won!"
             when :dealer then "Dealer won!"
             end
-  border = "----------------------------"
-  spacing = "\s" * ((border.size - message.size) / 2)
-  puts "#{border}\n#{spacing + message}\n#{border}"
+  spacing = "\s" * ((BORDER.size - message.size) / 2)
+  puts "#{BORDER}\n#{spacing + message}\n#{BORDER}"
 end
 
 def match_winner?(scores)
@@ -179,9 +180,8 @@ end
 
 def display_match_winner(winner)
   message = "#{winner.capitalize} is the match winner!"
-  border = "========================================="
-  spacing = "\s" * ((border.size - message.size) / 2)
-  puts "#{border}\n#{spacing + message}\n#{border}"
+  spacing = "\s" * ((DOUBLE_BORDER.size - message.size) / 2)
+  puts "#{DOUBLE_BORDER}\n#{spacing + message}\n#{DOUBLE_BORDER}"
 end
 
 def increment_score(scores, winner)
