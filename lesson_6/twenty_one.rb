@@ -26,9 +26,16 @@ def prompt(message)
 end
 
 def display_welcome
-  prompt("Welcome to Twenty-One!")
-  prompt("Closest to #{TARGET_NUM} without going over wins.")
+  clear_screen
+  puts "Welcome to Twenty-One!"
+  puts "Closest to #{TARGET_NUM} without going over wins."
   puts "========================================="
+end
+
+def display_goodbye
+  puts "============================"
+  puts "Thanks for playing Twenty-One! Goodbye."
+  puts "============================"
 end
 
 def display_hands(player_hand, dealer_hand, totals, results = false)
@@ -67,19 +74,20 @@ def player_turn(player_hand, dealer_hand, deck, totals)
     case hit_or_stay
     when :hit
       hit(player_hand, deck, totals, 'player')
-      break if busted?(totals, 'player')
+      totals['player'] = total(values(player_hand))
+      break if busted?(totals['player'])
     when :stay
       break
     end
   end
 
-  busted?(totals, 'player') ? play_again? : puts("You chose to stay!") # needs fix
+  puts("You chose to stay!") unless busted?(totals['player'])
 end
 
 def dealer_turn(dealer_hand, player_hand, deck, totals)
   totals['dealer'] = total(values(dealer_hand))
   loop do
-    break if totals['dealer'] >= DEALER_HIT_UNTIL || busted?(totals, 'dealer')
+    break if totals['dealer'] >= DEALER_HIT_UNTIL || busted?(totals['dealer'])
     hit(dealer_hand, deck, totals, 'dealer')
   end
 end
@@ -103,24 +111,34 @@ def hit(hand, deck, totals, current_player)
   totals[current_player] = total(values(hand))
 end
 
-def busted?(totals, current_player) # fix
-  totals[current_player] > 21
+def busted?(total)
+  total > 21
 end
 
 def detect_winner(totals)
   player_total, dealer_total = totals.values_at('player', 'dealer')
-  if player_total > dealer_total && !busted?(totals, 'player')
+
+  if busted?(player_total)
+    :player_busted
+  elsif busted?(dealer_total)
+    :dealer_busted
+  elsif player_total > dealer_total
     :player
-  elsif dealer_total > player_total && !busted?(totals, 'dealer')
+  elsif dealer_total >= player_total
     :dealer
   end
 end
 
 def display_winner(winner)
-  case winner
-  when :player then puts "You won!"
-  when :dealer then puts "Dealer won!"
-  end
+  message = case winner
+            when :player_busted then "You busted! Dealer wins!"
+            when :dealer_busted then "Dealer busted! You win!"
+            when :player then "You won!"
+            when :dealer then "Dealer won!"
+            end
+  border = "----------------------------"
+  spacing = "\s" * ((border.size - message.size) / 2)
+  puts "#{border}\n#{spacing + message + spacing}\n#{border}"
 end
 
 def values(hand)
@@ -160,18 +178,22 @@ loop do
 
   deck = initialize_deck
   player_hand, dealer_hand = deal_cards(deck)
-  totals = { 'player' => 0,
-             'dealer' => 0 }
+  totals = { 'player' => 0, 'dealer' => 0 }
 
   player_turn(player_hand, dealer_hand, deck, totals)
-  dealer_turn(dealer_hand, player_hand, deck, totals)
+
+  unless busted?(totals['player'])
+    dealer_turn(dealer_hand, player_hand, deck, totals)
+  end
+
   display_hands(player_hand, dealer_hand, totals, true)
   display_winner(detect_winner(totals))
 
   break unless play_again?
 end
 
-prompt("Thanks for playing! Goodbye.")
-
+display_goodbye
 
 # what to do when busted?
+# make joinor method
+# add clear_screen where appropriate
