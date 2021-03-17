@@ -63,13 +63,13 @@ def deal_cards(deck)
 end
 
 def player_turn(player_hand, dealer_hand, deck, totals)
-  totals['player'] = total(values(player_hand))
   loop do
     display_hands(player_hand, dealer_hand, totals)
 
     case hit_or_stay
     when :hit
-      hit(player_hand, deck, totals, 'player')
+      hit(player_hand, deck)
+      totals['player'] = total(values(player_hand))
       break if busted?(totals['player'])
       clear_screen
     when :stay
@@ -81,10 +81,10 @@ def player_turn(player_hand, dealer_hand, deck, totals)
 end
 
 def dealer_turn(dealer_hand, deck, totals)
-  totals['dealer'] = total(values(dealer_hand))
   loop do
     break if totals['dealer'] >= DEALER_HIT_UNTIL || busted?(totals['dealer'])
-    hit(dealer_hand, deck, totals, 'dealer')
+    hit(dealer_hand, deck)
+    totals['dealer'] = total(values(dealer_hand))
   end
 end
 
@@ -102,9 +102,8 @@ def hit_or_stay
   end
 end
 
-def hit(hand, deck, totals, current_player)
+def hit(hand, deck)
   hand << deck.pop
-  totals[current_player] = total(values(hand))
 end
 
 def busted?(total)
