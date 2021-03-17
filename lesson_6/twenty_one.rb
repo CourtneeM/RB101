@@ -22,9 +22,12 @@ end
 
 def display_welcome
   clear_screen
-  puts "Welcome to Twenty-One!"
-  puts "Closest to #{TARGET_NUM} without going over wins."
-  puts "========================================="
+  welcome = "Welcome to Twenty-One!"
+  rules = "Closest to #{TARGET_NUM} without going over wins."
+  border = "========================================="
+  spacing1 = "\s" * ((border.size - welcome.size) / 2)
+  spacing2 = "\s" * ((border.size - rules.size) / 2)
+  puts "#{border}\n#{spacing1 + welcome}\n#{spacing2 + rules}\n#{border}"
 end
 
 def display_goodbye
@@ -69,7 +72,7 @@ def player_turn(player_hand, dealer_hand, deck, totals)
     case hit_or_stay
     when :hit
       hit(player_hand, deck)
-      totals['player'] = total(values(player_hand))
+      update_total(player_hand, totals, 'player')
       break if busted?(totals['player'])
       clear_screen
     when :stay
@@ -84,7 +87,7 @@ def dealer_turn(dealer_hand, deck, totals)
   loop do
     break if totals['dealer'] >= DEALER_HIT_UNTIL || busted?(totals['dealer'])
     hit(dealer_hand, deck)
-    totals['dealer'] = total(values(dealer_hand))
+    update_total(dealer_hand, totals, 'dealer')
   end
 end
 
@@ -110,6 +113,10 @@ def busted?(total)
   total > 21
 end
 
+def update_total(hand, totals, current_player)
+  totals[current_player] = total(values(hand))
+end
+
 def detect_winner(totals)
   player_total, dealer_total = totals.values_at('player', 'dealer')
 
@@ -133,7 +140,7 @@ def display_winner(winner)
             end
   border = "----------------------------"
   spacing = "\s" * ((border.size - message.size) / 2)
-  puts "#{border}\n#{spacing + message + spacing}\n#{border}"
+  puts "#{border}\n#{spacing + message}\n#{border}"
 end
 
 def values(hand)
