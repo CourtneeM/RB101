@@ -1,8 +1,9 @@
 TARGET_NUM = 21
 DEALER_HIT_UNTIL = 17
 ROUNDS_TO_WIN = 5
-DOUBLE_BORDER = "=" * 42
-BORDER = "-" * 42
+BORDER_SIZE = 50
+DOUBLE_BORDER = "=" * BORDER_SIZE
+BORDER = "-" * BORDER_SIZE
 
 def clear_screen
   system('clear') || system('cls')
@@ -24,15 +25,18 @@ end
 def display_welcome
   clear_screen
   welcome = "Welcome to Whatever-One!"
-  rules = "Closest to #{TARGET_NUM} without going over wins."
-  spacing1 = "\s" * ((DOUBLE_BORDER.size - welcome.size) / 2)
-  spacing2 = "\s" * ((DOUBLE_BORDER.size - rules.size) / 2)
+  rules1 = "Closest to #{TARGET_NUM} without going over wins the round."
+  rules2 = "First to 5 points wins the match."
+  spacing1, spacing2, spacing3 = [welcome, rules1, rules2].map do |message|
+    "\s" * ((DOUBLE_BORDER.size - message.size) / 2)
+  end
 
-  puts "#{DOUBLE_BORDER}\n#{spacing1 + welcome}\n#{spacing2 + rules}\n#{DOUBLE_BORDER}"
+  puts "#{DOUBLE_BORDER}\n#{spacing1 + welcome}"
+  puts "#{spacing2 + rules1}\n#{spacing3 + rules2}\n#{DOUBLE_BORDER}"
 end
 
 def display_goodbye
-  message = "Thanks for playing Twenty-One! Goodbye."
+  message = "Thanks for playing Whatever-One! Goodbye."
   spacing = "\s" * ((DOUBLE_BORDER.size - message.size) / 2)
 
   puts "#{DOUBLE_BORDER}\n#{spacing + message}\n#{DOUBLE_BORDER}"
@@ -68,7 +72,7 @@ def initialize_deck
   suits.product(values).shuffle
 end
 
-def deal_cards(deck)
+def deal_cards!(deck)
   player_hand = []
   dealer_hand = []
 
@@ -77,15 +81,15 @@ def deal_cards(deck)
   [player_hand, dealer_hand]
 end
 
-def player_turn(player_hand, dealer_hand, deck, totals, scores)
+def player_turn!(player_hand, dealer_hand, deck, totals, scores)
   loop do
     display_scores(scores)
     display_hands(player_hand, dealer_hand, totals)
 
     case hit_or_stay
     when :hit
-      hit(player_hand, deck)
-      update_total(player_hand, totals, 'player')
+      hit!(player_hand, deck)
+      update_total!(player_hand, totals, 'player')
       break if busted?(totals['player'])
       clear_screen
     when :stay
@@ -96,11 +100,11 @@ def player_turn(player_hand, dealer_hand, deck, totals, scores)
   puts("You chose to stay!") unless busted?(totals['player'])
 end
 
-def dealer_turn(dealer_hand, deck, totals)
+def dealer_turn!(dealer_hand, deck, totals)
   loop do
     break if totals['dealer'] >= DEALER_HIT_UNTIL || busted?(totals['dealer'])
-    hit(dealer_hand, deck)
-    update_total(dealer_hand, totals, 'dealer')
+    hit!(dealer_hand, deck)
+    update_total!(dealer_hand, totals, 'dealer')
   end
 end
 
@@ -118,7 +122,7 @@ def hit_or_stay
   end
 end
 
-def hit(hand, deck)
+def hit!(hand, deck)
   hand << deck.pop
 end
 
@@ -126,7 +130,7 @@ def busted?(total)
   total > 21
 end
 
-def update_total(hand, totals, current_player)
+def update_total!(hand, totals, current_player)
   totals[current_player] = total(values(hand))
 end
 
@@ -188,7 +192,7 @@ def display_match_winner(winner)
   puts "#{DOUBLE_BORDER}\n#{spacing + message}\n#{DOUBLE_BORDER}"
 end
 
-def increment_score(scores, winner)
+def increment_score!(scores, winner)
   winner = 'player' if [:dealer_busted, :player].include?(winner)
   winner = 'dealer' if [:player_busted, :dealer].include?(winner)
   scores[winner] += 1
@@ -220,18 +224,18 @@ loop do
 
   loop do
     deck = initialize_deck
-    player_hand, dealer_hand = deal_cards(deck)
+    player_hand, dealer_hand = deal_cards!(deck)
     totals = { 'player' => total(values(player_hand)),
                'dealer' => total(values(dealer_hand)) }
 
-    player_turn(player_hand, dealer_hand, deck, totals, scores)
+    player_turn!(player_hand, dealer_hand, deck, totals, scores)
     clear_screen
 
     unless busted?(totals['player'])
-      dealer_turn(dealer_hand, deck, totals)
+      dealer_turn!(dealer_hand, deck, totals)
     end
 
-    increment_score(scores, detect_round_winner(totals))
+    increment_score!(scores, detect_round_winner(totals))
     display_scores(scores)
     display_hands(player_hand, dealer_hand, totals, true)
     display_round_winner(detect_round_winner(totals))
