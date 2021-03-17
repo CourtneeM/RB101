@@ -2,6 +2,7 @@ require 'pry'
 
 TARGET_NUM = 21
 DEALER_HIT_UNTIL = 17
+ROUNDS_TO_WIN = 3
 
 def clear_screen
   system('clear') || system('cls')
@@ -50,6 +51,11 @@ def display_hands(player_hand, dealer_hand, totals, results = false)
   puts "You have: #{joinand(player_values)} for a total of #{totals['player']}"
 end
 
+def display_scores(scores)
+  puts "[Player: #{scores['player']} | Dealer: #{scores['dealer']}]"
+  puts "-----------------------"
+end
+
 def initialize_deck
   suits = ['H', 'D', 'C', 'S']
   values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
@@ -65,8 +71,9 @@ def deal_cards(deck)
   [player_hand, dealer_hand]
 end
 
-def player_turn(player_hand, dealer_hand, deck, totals)
+def player_turn(player_hand, dealer_hand, deck, totals, scores)
   loop do
+    display_scores(scores)
     display_hands(player_hand, dealer_hand, totals)
 
     case hit_or_stay
@@ -117,32 +124,6 @@ def update_total(hand, totals, current_player)
   totals[current_player] = total(values(hand))
 end
 
-def detect_winner(totals)
-  player_total, dealer_total = totals.values_at('player', 'dealer')
-
-  if busted?(player_total)
-    :player_busted
-  elsif busted?(dealer_total)
-    :dealer_busted
-  elsif player_total > dealer_total
-    :player
-  elsif dealer_total >= player_total
-    :dealer
-  end
-end
-
-def display_winner(winner)
-  message = case winner
-            when :player_busted then "You busted! Dealer wins!"
-            when :dealer_busted then "Dealer busted! You win!"
-            when :player then "You won!"
-            when :dealer then "Dealer won!"
-            end
-  border = "----------------------------"
-  spacing = "\s" * ((border.size - message.size) / 2)
-  puts "#{border}\n#{spacing + message}\n#{border}"
-end
-
 def values(hand)
   hand.map { |card| card[1] }
 end
@@ -162,6 +143,48 @@ def total(hand_values)
   total
 end
 
+def detect_round_winner(totals)
+  player_total, dealer_total = totals.values_at('player', 'dealer')
+
+  if busted?(player_total)
+    :player_busted
+  elsif busted?(dealer_total)
+    :dealer_busted
+  elsif player_total > dealer_total
+    :player
+  elsif dealer_total >= player_total
+    :dealer
+  end
+end
+
+def display_round_winner(winner)
+  message = case winner
+            when :player_busted then "You busted! Dealer wins!"
+            when :dealer_busted then "Dealer busted! You win!"
+            when :player then "You won!"
+            when :dealer then "Dealer won!"
+            end
+  border = "----------------------------"
+  spacing = "\s" * ((border.size - message.size) / 2)
+  puts "#{border}\n#{spacing + message}\n#{border}"
+end
+
+def match_winner?(scores)
+  scores.any? { |_, v| v == ROUNDS_TO_WIN }
+end
+
+def increment_score(scores, winner)
+  winner = 'player' if [:dealer_busted, :player].include?(winner)
+  winner = 'dealer' if [:player_busted, :dealer].include?(winner)
+  scores[winner] += 1
+end
+
+def next_round_prompt
+  prompt("Hit enter to start next round.")
+  gets.chomp
+  clear_screen
+end
+
 def play_again?
   loop do
     prompt("Do you want to play again? (yes or no)")
@@ -177,22 +200,30 @@ end
 
 loop do
   display_welcome
+  scores = { 'player' => 0, 'dealer' => 0 }
 
-  deck = initialize_deck
-  player_hand, dealer_hand = deal_cards(deck)
-  totals = { 'player' => total(values(player_hand)),
-             'dealer' => total(values(dealer_hand)) }
+  loop do
+    deck = initialize_deck
+    player_hand, dealer_hand = deal_cards(deck)
+    totals = { 'player' => total(values(player_hand)),
+               'dealer' => total(values(dealer_hand)) }
 
-  player_turn(player_hand, dealer_hand, deck, totals)
-  clear_screen
+    player_turn(player_hand, dealer_hand, deck, totals, scores)
+    clear_screen
 
-  unless busted?(totals['player'])
-    dealer_turn(dealer_hand, deck, totals)
+    unless busted?(totals['player'])
+      dealer_turn(dealer_hand, deck, totals)
+    end
+
+    increment_score(scores, detect_round_winner(totals))
+    display_scores(scores)
+    display_hands(player_hand, dealer_hand, totals, true)
+    display_round_winner(detect_round_winner(totals))
+
+    break if match_winner?(scores)
+    next_round_prompt
   end
-
-  display_hands(player_hand, dealer_hand, totals, true)
-  display_winner(detect_winner(totals))
-
+  # display_match_winner(scores)
   break unless play_again?
 end
 
