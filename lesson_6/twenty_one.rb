@@ -2,7 +2,7 @@ require 'pry'
 
 TARGET_NUM = 21
 DEALER_HIT_UNTIL = 17
-ROUNDS_TO_WIN = 3
+ROUNDS_TO_WIN = 5
 
 def clear_screen
   system('clear') || system('cls')
@@ -173,6 +173,17 @@ def match_winner?(scores)
   scores.any? { |_, v| v == ROUNDS_TO_WIN }
 end
 
+def detect_match_winner(scores)
+  scores.select { |_, v| v == ROUNDS_TO_WIN }.keys[0]
+end
+
+def display_match_winner(winner)
+  message = "#{winner.capitalize} is the match winner!"
+  border = "========================================="
+  spacing = "\s" * ((border.size - message.size) / 2)
+  puts "#{border}\n#{spacing + message}\n#{border}"
+end
+
 def increment_score(scores, winner)
   winner = 'player' if [:dealer_busted, :player].include?(winner)
   winner = 'dealer' if [:player_busted, :dealer].include?(winner)
@@ -223,8 +234,10 @@ loop do
     break if match_winner?(scores)
     next_round_prompt
   end
-  # display_match_winner(scores)
+
+  display_match_winner(detect_match_winner(scores))
   break unless play_again?
 end
 
+clear_screen
 display_goodbye
