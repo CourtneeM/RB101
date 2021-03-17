@@ -1,17 +1,3 @@
-# 1. Initialize deck
-# 2. Deal cards to player and dealer
-# 3. Player turn: hit or stay
-#   - repeat until bust or "stay"
-# 4. If player bust, dealer wins.
-# 5. Dealer turn: hit or stay
-#   - repeat until total >= 17
-# 6. If dealer bust, player wins.
-# 7. Compare cards and declare winner.
-
-# Data Structures
-# - deck: nested array [['H', '2'], ['C', 'A'], ['S', '9']]
-# - player / dealer cards: array
-
 require 'pry'
 
 TARGET_NUM = 21
@@ -19,6 +5,15 @@ DEALER_HIT_UNTIL = 17
 
 def clear_screen
   system('clear') || system('cls')
+end
+
+def joinand(arr)
+  case arr.size
+  when 2
+    arr.join(' and ')
+  when (2..nil)
+    arr.join(', ').split.insert(-2, 'and').join(' ')
+  end
 end
 
 def prompt(message)
@@ -44,11 +39,12 @@ def display_hands(player_hand, dealer_hand, totals, results = false)
 
   case results
   when true
-    puts "Dealer has: #{dealer_values.join(', ')} for a total of #{totals['dealer']}"
+    puts "Dealer has: #{joinand(dealer_values)} " \
+         "for a total of #{totals['dealer']}"
   when false
     puts "Dealer has: #{dealer_values[0]} and unknown card"
   end
-  puts "You have: #{player_values.join(', ')} for a total of #{totals['player']}"
+  puts "You have: #{joinand(player_values)} for a total of #{totals['player']}"
 end
 
 def initialize_deck
@@ -85,7 +81,7 @@ def player_turn(player_hand, dealer_hand, deck, totals)
   puts("You chose to stay!") unless busted?(totals['player'])
 end
 
-def dealer_turn(dealer_hand, player_hand, deck, totals)
+def dealer_turn(dealer_hand, deck, totals)
   totals['dealer'] = total(values(dealer_hand))
   loop do
     break if totals['dealer'] >= DEALER_HIT_UNTIL || busted?(totals['dealer'])
@@ -186,7 +182,7 @@ loop do
   clear_screen
 
   unless busted?(totals['player'])
-    dealer_turn(dealer_hand, player_hand, deck, totals)
+    dealer_turn(dealer_hand, deck, totals)
   end
 
   display_hands(player_hand, dealer_hand, totals, true)
@@ -196,5 +192,3 @@ loop do
 end
 
 display_goodbye
-
-# make joinor method
