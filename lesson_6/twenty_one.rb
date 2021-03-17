@@ -33,9 +33,9 @@ def display_welcome
 end
 
 def display_goodbye
-  puts "============================"
+  puts "======================================="
   puts "Thanks for playing Twenty-One! Goodbye."
-  puts "============================"
+  puts "======================================="
 end
 
 def display_hands(player_hand, dealer_hand, totals, results = false)
@@ -76,6 +76,7 @@ def player_turn(player_hand, dealer_hand, deck, totals)
       hit(player_hand, deck, totals, 'player')
       totals['player'] = total(values(player_hand))
       break if busted?(totals['player'])
+      clear_screen
     when :stay
       break
     end
@@ -178,9 +179,11 @@ loop do
 
   deck = initialize_deck
   player_hand, dealer_hand = deal_cards(deck)
-  totals = { 'player' => 0, 'dealer' => 0 }
+  totals = { 'player' => total(values(player_hand)),
+             'dealer' => total(values(dealer_hand)) }
 
   player_turn(player_hand, dealer_hand, deck, totals)
+  clear_screen
 
   unless busted?(totals['player'])
     dealer_turn(dealer_hand, player_hand, deck, totals)
@@ -194,6 +197,4 @@ end
 
 display_goodbye
 
-# what to do when busted?
 # make joinor method
-# add clear_screen where appropriate
