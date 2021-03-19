@@ -14,7 +14,7 @@ def joinand(arr)
   when 2
     arr.join(' and ')
   when (2..nil)
-    arr.join(', ').split.insert(-2, 'and').join(' ')
+    arr.join(', ').split.insert(-4, 'and').join(' ')
   end
 end
 
@@ -43,17 +43,22 @@ def display_goodbye
 end
 
 def display_hands(player_hand, dealer_hand, totals, results = false)
-  player_values = values(player_hand)
-  dealer_values = values(dealer_hand)
+  player_hand_details = player_hand.map do |card|
+    "#{card[:value]} of #{card[:suit]}"
+  end
+  dealer_hand_details = dealer_hand.map do |card|
+    "#{card[:value]} of #{card[:suit]}"
+  end
 
   case results
   when true
-    puts "Dealer has: #{joinand(dealer_values)} " \
+    puts "Dealer has: #{joinand(dealer_hand_details)} " \
          "for a total of #{totals['dealer']}"
   when false
-    puts "Dealer has: #{dealer_values[0]} and unknown card"
+    puts "Dealer has: #{dealer_hand_details[0]} and unknown card"
   end
-  puts "You have: #{joinand(player_values)} for a total of #{totals['player']}"
+  puts "You have: #{joinand(player_hand_details)} for " \
+       "a total of #{totals['player']}"
 end
 
 def display_scores(scores)
@@ -67,8 +72,9 @@ def display_rounds_played(round)
 end
 
 def initialize_deck
-  suits = ['H', 'D', 'C', 'S']
-  values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+  suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
+  values = ['2', '3', '4', '5', '6', '7', '8', '9',
+            '10', 'Jack', 'Queen', 'King', 'Ace']
   suits.product(values).shuffle
 end
 
@@ -76,7 +82,12 @@ def deal_cards!(deck)
   player_hand = []
   dealer_hand = []
 
-  2.times { [player_hand, dealer_hand].each { |hand| hand << deck.pop } }
+  2.times do
+    [player_hand, dealer_hand].each do |hand|
+      card = deck.pop
+      hand << { suit: card[0], value: card[1] }
+    end
+  end
 
   [player_hand, dealer_hand]
 end
@@ -123,33 +134,31 @@ def hit_or_stay
 end
 
 def hit!(hand, deck)
-  hand << deck.pop
+  card = deck.pop
+  hand << { suit: card[0], value: card[1] }
 end
 
 def busted?(total)
-  total > 21
+  total > TARGET_NUM
 end
 
 def update_total!(hand, totals, current_player)
-  totals[current_player] = total(values(hand))
+  totals[current_player] = total(hand)
 end
 
-def values(hand)
-  hand.map { |card| card[1] }
-end
-
-def total(hand_values)
-  total = hand_values.map do |value|
-    if ['J', 'Q', 'K'].include?(value)
+def total(hand)
+  values = hand.map { |card| card[:value] }
+  total = values.map do |value|
+    if ['Jack', 'Queen', 'King'].include?(value)
       10
-    elsif value == 'A'
+    elsif value == 'Ace'
       11
     else
       value.to_i
     end
   end.sum
 
-  hand_values.count('A').times { total -= 10 if total > 21 }
+  values.count('Ace').times { total -= 10 if total > TARGET_NUM }
   total
 end
 
@@ -225,8 +234,8 @@ loop do
   loop do
     deck = initialize_deck
     player_hand, dealer_hand = deal_cards!(deck)
-    totals = { 'player' => total(values(player_hand)),
-               'dealer' => total(values(dealer_hand)) }
+    totals = { 'player' => total(player_hand),
+               'dealer' => total(dealer_hand) }
 
     player_turn!(player_hand, dealer_hand, deck, totals, scores)
     clear_screen
